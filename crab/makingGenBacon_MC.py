@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+import sys
 #from RecoJets.Configuration.RecoGenJets_cff     import ak5GenJets
 
 process = cms.Process('MakingGenBacon')
@@ -17,7 +18,7 @@ process.GlobalTag.globaltag = 'START53_V7G::ALL'
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring('file:/afs/cern.ch/work/j/jlawhorn/PYTHIA-GEN-SIM/Zee.root')
+                            fileNames = cms.untracked.vstring(sys.argv[2])
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -50,32 +51,9 @@ withLeptons = cms.bool(False),
 src = cms.InputTag("genParticles")
 )
 
-#process.AK4GenJets = ak5GenJets.clone(
-#    rParam = cms.double(0.4)
-#    )
-
-#process.AK4byRef = cms.EDProducer("JetPartonMatcher",
-#jets = cms.InputTag("AK4GenJets"),
-#coneSizeToAssociate = cms.double(0.3),
-#partons = cms.InputTag("partons")
-#)
-
-#process.AK4byValPhys = cms.EDProducer("JetFlavourIdentifier",
-#srcByReference = cms.InputTag("AK4byRef"),
-#physicsDefinition = cms.bool(True),
-#leptonInfo = cms.bool(True)
-#)
-
-#process.AK4byValAlgo = cms.EDProducer("JetFlavourIdentifier",
-#srcByReference = cms.InputTag("AK4byRef"),
-#physicsDefinition = cms.bool(False),
-#leptonInfo = cms.bool(True))
-
-#process.AK4jetFlavor = cms.Sequence(AK4byRef*AK4byValPhys*AK4byValAlgo)
-
 process.ntupler = cms.EDAnalyzer('GenNtuplerMod',
   skipOnHLTFail = cms.untracked.bool(False),
-  outputName    = cms.untracked.string('/afs/cern.ch/work/j/jlawhorn/PYTHIA-GEN-SIM/Zee_bacon.root'),
+  outputName    = cms.untracked.string(sys.argv[3]),
   TriggerFile   = cms.untracked.string("tt"),
   edmPVName     = cms.untracked.string('offlinePrimaryVertices'),
   edmPFCandName = cms.untracked.string('particleFlow'),
@@ -83,13 +61,12 @@ process.ntupler = cms.EDAnalyzer('GenNtuplerMod',
   GenInfo = cms.untracked.PSet(
     isActive            = cms.untracked.bool(True),
     edmGenEventInfoName = cms.untracked.string('generator'),
+    edmLHEEventName     = cms.untracked.string('source'),
     edmGenMETName = cms.untracked.string('genMetTrue'),
     edmGenParticlesName = cms.untracked.string('genParticles'),
-#    edmGenJetName       = cms.untracked.string('AK4GenJets'),
     fillAllGen          = cms.untracked.bool(True)
   )
 )
  
-#process.baconSequence = cms.Sequence(process.genParticlesForJets+process.AK4GenJets+process.partons+process.AK4byRef+process.AK4byValPhys+process.AK4byValAlgo+process.ntupler)
 process.baconSequence = cms.Sequence(process.partons+process.ntupler)
 process.p = cms.Path(process.baconSequence)

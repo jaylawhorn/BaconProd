@@ -5,6 +5,7 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "DataFormats/Common/interface/RefToPtr.h"
 #include <TClonesArray.h>
 
@@ -13,6 +14,7 @@ using namespace baconhep;
 //--------------------------------------------------------------------------------------------------
 FillerGenInfo::FillerGenInfo(const edm::ParameterSet &iConfig):
   fGenEvtInfoName(iConfig.getUntrackedParameter<std::string>("edmGenEventInfoName","generator")),
+  fLHEEventName  (iConfig.getUntrackedParameter<std::string>("edLHEEventName","source")),
   fGenParName    (iConfig.getUntrackedParameter<std::string>("edmGenParticlesName","genParticles")),
   fFillAll       (iConfig.getUntrackedParameter<bool>("fillAllGen",true))
 {}
@@ -27,10 +29,11 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,
   assert(array);
   
   // Get generator event information
+
   edm::Handle<GenEventInfoProduct> hGenEvtInfoProduct;
   iEvent.getByLabel(fGenEvtInfoName,hGenEvtInfoProduct);
   assert(hGenEvtInfoProduct.isValid());
-
+  /*
   const gen::PdfInfo *pdfInfo = (hGenEvtInfoProduct->hasPDF()) ? hGenEvtInfoProduct->pdf() : 0;
   genEvtInfo->id_1     = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->id.first    : 0;
   genEvtInfo->id_2     = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->id.second   : 0;
@@ -38,7 +41,23 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,
   genEvtInfo->x_2      = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->x.second    : 0;
   genEvtInfo->weight   = hGenEvtInfoProduct->weight();
   genEvtInfo->scalePDF = hGenEvtInfoProduct->qScale();
-  
+  */
+
+  edm::Handle<LHEEventProduct> hLHEEventProduct;
+  iEvent.getByLabel(fLHEEventName,hLHEEventProduct);
+  assert(hLHEEventProduct.isValid());
+
+  const gen::PdfInfo *pdfInfo = (hLHEEventProduct->pdf()!=0) ? hLHEEventProduct->pdf() : 0;
+  genEvtInfo->id_1     = (hLHEEventProduct->pdf()!=0) ? pdfInfo->id.first    : 0;
+  genEvtInfo->id_2     = (hLHEEventProduct->pdf()!=0) ? pdfInfo->id.second   : 0;
+  genEvtInfo->x_1      = (hLHEEventProduct->pdf()!=0) ? pdfInfo->x.first     : 0;
+  genEvtInfo->x_2      = (hLHEEventProduct->pdf()!=0) ? pdfInfo->x.second    : 0;
+  genEvtInfo->xPDF_1   = (hLHEEventProduct->pdf()!=0) ? pdfInfo->xPDF.first  : 0;
+  genEvtInfo->xPDF_2   = (hLHEEventProduct->pdf()!=0) ? pdfInfo->xPDF.second : 0;
+  genEvtInfo->scalePDF = (hLHEEventProduct->pdf()!=0) ? pdfInfo->scalePDF    : 0;
+
+  genEvtInfo->weight   = hGenEvtInfoProduct->weight();
+
   
   // Get generator particles collection
   edm::Handle<reco::GenParticleCollection> hGenParProduct;

@@ -27,6 +27,7 @@ namespace baconhep
       
       // EDM object collection names
       std::string fGenEvtInfoName;
+      std::string fLHEEventName;
       std::string fGenParName;
       bool        fFillAll;
   };
