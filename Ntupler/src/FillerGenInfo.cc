@@ -43,18 +43,18 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,
   genEvtInfo->scalePDF = hGenEvtInfoProduct->qScale();
   */
 
-  edm::Handle<LHEEventProduct> hLHEEventProduct;
-  iEvent.getByLabel(fLHEEventName,hLHEEventProduct);
-  assert(hLHEEventProduct.isValid());
+  //edm::Handle<LHEEventProduct> hLHEEventProduct;
+  //iEvent.getByLabel(fLHEEventName,hLHEEventProduct);
+  //assert(hLHEEventProduct.isValid());
 
-  const gen::PdfInfo *pdfInfo = (hLHEEventProduct->pdf()!=0) ? hLHEEventProduct->pdf() : 0;
-  genEvtInfo->id_1     = (hLHEEventProduct->pdf()!=0) ? pdfInfo->id.first    : 0;
-  genEvtInfo->id_2     = (hLHEEventProduct->pdf()!=0) ? pdfInfo->id.second   : 0;
-  genEvtInfo->x_1      = (hLHEEventProduct->pdf()!=0) ? pdfInfo->x.first     : 0;
-  genEvtInfo->x_2      = (hLHEEventProduct->pdf()!=0) ? pdfInfo->x.second    : 0;
-  genEvtInfo->xPDF_1   = (hLHEEventProduct->pdf()!=0) ? pdfInfo->xPDF.first  : 0;
-  genEvtInfo->xPDF_2   = (hLHEEventProduct->pdf()!=0) ? pdfInfo->xPDF.second : 0;
-  genEvtInfo->scalePDF = (hLHEEventProduct->pdf()!=0) ? pdfInfo->scalePDF    : 0;
+  const gen::PdfInfo *pdfInfo = ( hGenEvtInfoProduct->pdf()!=0) ?  hGenEvtInfoProduct->pdf() : 0;
+  genEvtInfo->id_1     = (hGenEvtInfoProduct->pdf()!=0) ? pdfInfo->id.first    : 0;
+  genEvtInfo->id_2     = (hGenEvtInfoProduct->pdf()!=0) ? pdfInfo->id.second   : 0;
+  genEvtInfo->x_1      = (hGenEvtInfoProduct->pdf()!=0) ? pdfInfo->x.first     : 0;
+  genEvtInfo->x_2      = (hGenEvtInfoProduct->pdf()!=0) ? pdfInfo->x.second    : 0;
+  genEvtInfo->xPDF_1   = (hGenEvtInfoProduct->pdf()!=0) ? pdfInfo->xPDF.first  : 0;
+  genEvtInfo->xPDF_2   = (hGenEvtInfoProduct->pdf()!=0) ? pdfInfo->xPDF.second : 0;
+  genEvtInfo->scalePDF = (hGenEvtInfoProduct->pdf()!=0) ? pdfInfo->scalePDF    : 0;
 
   genEvtInfo->weight   = hGenEvtInfoProduct->weight();
 

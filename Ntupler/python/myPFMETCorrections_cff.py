@@ -7,8 +7,8 @@ from JetMETCorrections.Configuration.JetCorrectionServices_cff import *
 # produce Type 1 MET corrections for PFJets
 pfJetMETcorr = cms.EDProducer("PFJetMETcorrInputProducer",
     src = cms.InputTag('ak4PFJets'),
-    offsetCorrLabel = cms.string("ak4PFL1Fastjet"),
-    jetCorrLabel = cms.string("ak4PFL1FastL2L3"), # NOTE: use "ak4PFL1FastL2L3" for MC / "ak4PFL1FastL2L3Residual" for Data
+    offsetCorrLabel = cms.InputTag("ak4PFL1Fastjet"),
+    jetCorrLabel = cms.InputTag("ak4PFL1FastL2L3"), # NOTE: use "ak4PFL1FastL2L3" for MC / "ak4PFL1FastL2L3Residual" for Data
     jetCorrEtaMax = cms.double(9.9),
     type1JetPtThreshold = cms.double(10.0),
     skipEM = cms.bool(True),

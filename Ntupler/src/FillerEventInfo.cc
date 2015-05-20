@@ -219,12 +219,12 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
 //    evtInfo->pfMETCov11 = inPFMET.getSignificanceMatrix()(1,1);
 
     // Corrected PF MET
-    edm::Handle<reco::PFMETCollection> hPFMETCProduct;
-    iEvent.getByLabel(fPFMETCName,hPFMETCProduct);
-    assert(hPFMETCProduct.isValid());
-    const reco::PFMET &inPFMETC = hPFMETCProduct.product()->front();
-    evtInfo->pfMETC      = inPFMETC.pt();
-    evtInfo->pfMETCphi   = inPFMETC.phi();
+    //edm::Handle<reco::PFMETCollection> hPFMETCProduct;
+    //iEvent.getByLabel(fPFMETCName,hPFMETCProduct);
+    //assert(hPFMETCProduct.isValid());
+    //const reco::PFMET &inPFMETC = hPFMETCProduct.product()->front();
+    evtInfo->pfMETC      = 0.0;//inPFMETC.pt();
+    evtInfo->pfMETCphi   = 0.0;//inPFMETC.phi();
 //    evtInfo->pfMETCCov00 = inPFMETC.getSignificanceMatrix()(0,0);
 //    evtInfo->pfMETCCov01 = inPFMETC.getSignificanceMatrix()(0,1);
 //    evtInfo->pfMETCCov11 = inPFMETC.getSignificanceMatrix()(1,1);

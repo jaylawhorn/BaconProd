@@ -12,7 +12,7 @@ process.load('Configuration/EventContent/EventContent_cff')
 process.load('TrackingTools/TransientTrack/TransientTrackBuilder_cfi')
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
-process.GlobalTag.globaltag = 'PHYS14_25_V1::All'
+process.GlobalTag.globaltag = 'MCRUN2_74_V9A::All'
 
 #process.load("RecoTauTag/Configuration/RecoPFTauTag_cff")
 
@@ -38,10 +38,10 @@ for line in hlt_file.readlines():
     hlt_path = line.split()[0]
     process.hltHighLevel.HLTPaths.extend(cms.untracked.vstring(hlt_path))
     
-    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
     process.source = cms.Source("PoolSource",
                                 #fileNames  = cms.untracked.vstring('file:/afs/cern.ch/work/k/ksung/private/Phys14DR/TT_scaleup_Tune4C_13TeV-pythia8-tauola_AODSIM_0E297521-506F-E411-BD1A-0025901D4936.root')
-                                fileNames = cms.untracked.vstring('/store/mc/Phys14DR/DYJetsToLL_M-50_13TeV-madgraph-pythia8/AODSIM/PU20bx25_PHYS14_25_V1-v1/00000/00CC714A-F86B-E411-B99A-0025904B5FB8.root')
+                                fileNames = cms.untracked.vstring('/store/mc/RunIISpring15DR74/WToMuNu_M-1000_TuneCUETP8M1_13TeV-pythia8/AODSIM/Asympt50ns_MCRUN2_74_V9A-v1/80000/220AF254-D4FE-E411-A6BD-02163E011822.root')
                                 )
     process.source.inputCommands = cms.untracked.vstring("keep *",
                                                          "drop *_MEtoEDMConverter_*_*")
@@ -56,7 +56,7 @@ for line in hlt_file.readlines():
     do_hlt_filter = False
     process.ntupler = cms.EDAnalyzer('NtuplerMod',
                                      skipOnHLTFail = cms.untracked.bool(do_hlt_filter),
-                                     outputName    = cms.untracked.string('/afs/cern.ch/work/j/jlawhorn/Phys14_Zll_test.root'),
+                                     outputName    = cms.untracked.string('Output.root'),
                                      TriggerFile   = cms.untracked.string(hlt_filename),
                                      edmPVName     = cms.untracked.string('offlinePrimaryVertices'),
                                      edmPFCandName = cms.untracked.string('particleFlow'),
@@ -195,7 +195,7 @@ for line in hlt_file.readlines():
     process.baconSequence = cms.Sequence(#process.PFBRECO*
       #process.puppi*
       process.metFilters*
-      process.producePFMETCorrections*
+      #process.producePFMETCorrections*
       #process.recojetsequence*
       #process.genjetsequence*
       #process.AK5jetsequenceCHS*
