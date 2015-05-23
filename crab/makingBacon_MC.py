@@ -27,7 +27,7 @@ process.load("BaconProd/Ntupler/myPFMETCorrections_cff")  # PF MET corrections
 # trigger filter
 import os
 cmssw_base = os.environ['CMSSW_BASE']
-hlt_filename = "BaconAna/DataFormats/data/HLTFile_phys14"
+hlt_filename = "BaconAna/DataFormats/data/HLT_50nsGRun"
 process.load('HLTrigger/HLTfilters/hltHighLevel_cfi')
 process.hltHighLevel.throw = cms.bool(False)
 process.hltHighLevel.HLTPaths = cms.vstring()
