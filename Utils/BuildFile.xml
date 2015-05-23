@@ -2,7 +2,7 @@
 <use name="RecoEgamma/EgammaTools"/>
 <use name="root"/>
 <use name="roottmva"/>
-<use name="rootcintex"/>
+<!--use name="rootcintex"/-->
 <use name="fastjet"/>
 <flags CXXFLAGS="-g -Wall"/>
 <export>
