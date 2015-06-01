@@ -210,6 +210,7 @@ void NtuplerMod::beginJob()
   if(fIsActiveEle)    { fEventTree->Branch("Electron", &fEleArr); }
   if(fIsActiveMuon)   { fEventTree->Branch("Muon",     &fMuonArr); }
   if(fIsActivePhoton) { fEventTree->Branch("Photon",   &fPhotonArr); }
+  if(fIsActivePV)     { fEventTree->Branch("PV",       &fPVArr); }
   if(fIsActiveJet) {
     fEventTree->Branch("AK4CHS", &fJetArr[0]);
   }

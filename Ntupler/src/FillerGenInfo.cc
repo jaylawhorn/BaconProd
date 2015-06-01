@@ -99,6 +99,9 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,
     pGenPart->phi    = itGenP->phi();
     pGenPart->y      = itGenP->rapidity();
     pGenPart->mass   = itGenP->mass();
+    pGenPart->decx   = itGenP->vx();
+    pGenPart->decy   = itGenP->vy();
+    pGenPart->decz   = itGenP->vz();
     if(itGenP->numberOfMothers() >  0 ) {
       int lId = -2;
       edm::Ptr<reco::GenParticle> lMomPtr = edm::refToPtr(itGenP->motherRef()); 
