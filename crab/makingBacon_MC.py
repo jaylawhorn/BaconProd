@@ -38,10 +38,9 @@ for line in hlt_file.readlines():
     hlt_path = line.split()[0]
     process.hltHighLevel.HLTPaths.extend(cms.untracked.vstring(hlt_path))
     
-    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
     process.source = cms.Source("PoolSource",
-                                #fileNames  = cms.untracked.vstring('file:/afs/cern.ch/work/k/ksung/private/Phys14DR/TT_scaleup_Tune4C_13TeV-pythia8-tauola_AODSIM_0E297521-506F-E411-BD1A-0025901D4936.root')
-                                fileNames = cms.untracked.vstring('/store/mc/RunIISpring15DR74/WToMuNu_M-1000_TuneCUETP8M1_13TeV-pythia8/AODSIM/Asympt50ns_MCRUN2_74_V9A-v1/80000/220AF254-D4FE-E411-A6BD-02163E011822.root')
+                                fileNames = cms.untracked.vstring('root://eoscms//store/mc/RunIISpring15DR74/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/AODSIM/Asympt50ns_MCRUN2_74_V9A-v1/70000/162B6D42-C5FE-E411-BBE1-02163E013BBE.root')
                                 )
     process.source.inputCommands = cms.untracked.vstring("keep *",
                                                          "drop *_MEtoEDMConverter_*_*")
