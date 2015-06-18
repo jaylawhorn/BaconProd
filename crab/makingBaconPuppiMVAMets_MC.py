@@ -24,7 +24,7 @@ process.load('RecoMET.METPUSubtraction.mvaPFMET_cff')     # MVA MET from Stephan
 process.load("BaconProd/Ntupler/myPFMETCorrections_cff")  # PF MET corrections
 #process.pfJetMETcorr.jetCorrLabel = cms.string("ak5PFL1FastL2L3")
 
-# i think not needed for puppi met
+# load Puppi stuff
 process.load('CommonTools/PileupAlgos/Puppi_cff') 
 ## e.g. to run on miniAOD
 process.puppi.candName = cms.InputTag('particleFlow')
@@ -206,9 +206,9 @@ for line in hlt_file.readlines():
     
     process.baconSequence = cms.Sequence(#process.PFBRECO*
       process.metFilters*
-      process.pfMVAMEtSequence* #MVA MET from Stephanie
-      process.puppi* #do puppi
-      process.pfMetPuppi* # do Puppi Met
+      process.pfMVAMEtSequence* #MVA MET
+      process.puppi* #  puppi
+      process.pfMetPuppi* #  Puppi Met
       #process.producePFMETCorrections*
       #process.recojetsequence*
       #process.genjetsequence*
