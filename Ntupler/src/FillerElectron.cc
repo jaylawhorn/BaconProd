@@ -31,6 +31,7 @@ FillerElectron::FillerElectron(const edm::ParameterSet &iConfig):
   fEleName     (iConfig.getUntrackedParameter<std::string>("edmName","gedGsfElectrons")),
   fPFCandName  (iConfig.getUntrackedParameter<std::string>("edmPFCandName","particleFlow")),
   fTrackName   (iConfig.getUntrackedParameter<std::string>("edmTrackName","generalTracks")),
+  fBeamspotName (iConfig.getUntrackedParameter<std::string>("edmBeamspotName","beamspot")),
   fConvName    (iConfig.getUntrackedParameter<std::string>("edmConversionName","allConversions")),
   fSCName      (iConfig.getUntrackedParameter<std::string>("edmSCName","particleFlowEGamma"))
 {
@@ -68,6 +69,10 @@ void FillerElectron::fill(TClonesArray *array,
   assert(hTrackProduct.isValid());
   const reco::TrackCollection *trackCol = hTrackProduct.product();
   
+  // Get beam spot
+  edm::Handle<reco::BeamSpot> theBeamSpot;
+  iEvent.getByLabel(fBeamspotName,theBeamSpot);
+ 
   // Get conversions collection
   edm::Handle<reco::ConversionCollection> hConvProduct;
   iEvent.getByLabel(fConvName,hConvProduct);
@@ -170,7 +175,7 @@ void FillerElectron::fill(TClonesArray *array,
     
     pElectron->mva = -999;
 /** check conversion stuff **/    
-    pElectron->isConv = ConversionTools::hasMatchedConversion(*itEle, hConvProduct, pv.position(), true, 2.0, 1e-6, 0);
+    pElectron->isConv = ConversionTools::hasMatchedConversion(*itEle, hConvProduct, theBeamSpot->position());
     
     if(gsfTrack.isNonnull()) {
       pElectron->nMissingHits = gsfTrack->hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS);
