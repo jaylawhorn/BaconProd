@@ -19,3 +19,5 @@ from ksung25, csa14 version
   
   
 Use config file crab/makingBaconPuppiMVAMets_MC.py to include MVA and PUPPI calculations
+
+## Side note: in MVA MET calculation, the only leptons at the moment are muons... others will be added soon
