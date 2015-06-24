@@ -2,7 +2,7 @@
 from ksung25, csa14 version
 
 
-##To include MVA MET
+##To include custom MVA MET
 
 
   git-cms-merge-topic sabrandt:MVAForBaconv2
