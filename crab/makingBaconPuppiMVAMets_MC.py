@@ -116,6 +116,7 @@ for line in hlt_file.readlines():
         edmName                   = cms.untracked.string('gedGsfElectrons'),
         edmPFCandName             = cms.untracked.string('particleFlow'),
         edmTrackName              = cms.untracked.string('generalTracks'),
+        edmBeamspotName           = cms.untracked.string('offlineBeamSpot'),
         edmConversionName         = cms.untracked.string('allConversions'),
         edmSuperClusterName       = cms.untracked.string('particleFlowEGamma')
         ),

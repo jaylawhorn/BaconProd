@@ -24,7 +24,7 @@ FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig):
   fBSName     (iConfig.getUntrackedParameter<std::string>("edmBeamspotName","offlineBeamSpot")),
   fPFMETName  (iConfig.getUntrackedParameter<std::string>("edmPFMETName","pfMet")),
   fPFMETCName (iConfig.getUntrackedParameter<std::string>("edmPFMETCorrName","pfType1CorrectedMet")),
-  fPuppETName (iConfig.getUntrackedParameter<std::string>("edmPuppETName","puppEt")),
+  //fPuppETName (iConfig.getUntrackedParameter<std::string>("edmPuppETName","puppEt")),
   fMVAMETName (iConfig.getUntrackedParameter<std::string>("edmMVAMETName","pfMEtMVA")),
 //  fMVAMETUName(iConfig.getUntrackedParameter<std::string>("edmMVAMETUnityName","pfMEtMVAUnity")),
 //  fMVAMET0Name(iConfig.getUntrackedParameter<std::string>("edmMVAMETNoSmearName","pfMEtMVANoSmear")),
@@ -321,7 +321,7 @@ void FillerEventInfo::computeTrackMET(const reco::Vertex &pv, const reco::PFCand
   
   double metx=0, mety=0;
   for(reco::PFCandidateCollection::const_iterator itPF = pfCandCol->begin(); itPF!=pfCandCol->end(); ++itPF) {
-    if(itPF->trackRef().isNonnull() && pv.trackWeight(itPF->trackRef())>0) {
+    if(itPF->trackRef().isNonnull() && pv.trackWeight(itPF->trackRef())>0 && fabs(itPF->vz()-pv.z())<0.2) {
       metx  -= itPF->px();
       mety  -= itPF->py();
     }

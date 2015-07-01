@@ -43,6 +43,7 @@ namespace baconhep
       std::string fEleName;
       std::string fPFCandName;
       std::string fTrackName;
+      std::string fBeamspotName;
       std::string fConvName;
       std::string fSCName;
   };
