@@ -43,6 +43,11 @@ hlt_filename = "BaconAna/DataFormats/data/HLT_50nsGRun"
 process.load('HLTrigger/HLTfilters/hltHighLevel_cfi')
 process.hltHighLevel.throw = cms.bool(False)
 process.hltHighLevel.HLTPaths = cms.vstring()
+
+process.pfMVAMEt.isTestSample = cms.bool(False)
+#process.pfMVAMEt.srcLeptons = cms.VInputTag("muons")
+process.pfMVAMEt.minCorrJetPt = cms.double(30)
+
 hlt_file = open(cmssw_base + "/src/" + hlt_filename, "r")
 for line in hlt_file.readlines():
   line = line.strip()              # strip preceding and trailing whitespaces
@@ -50,9 +55,9 @@ for line in hlt_file.readlines():
     hlt_path = line.split()[0]
     process.hltHighLevel.HLTPaths.extend(cms.untracked.vstring(hlt_path))
     
-    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20) )
     process.source = cms.Source("PoolSource",
-                                fileNames = cms.untracked.vstring('/store/mc/RunIISpring15DR74/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/AODSIM/Asympt50ns_MCRUN2_74_V9A-v1/00000/0078400B-12FD-E411-8407-0025904C6374.root')
+                                fileNames = cms.untracked.vstring('root://xrootd-cms.infn.it//store/mc/RunIISpring15DR74/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/AODSIM/Asympt50ns_MCRUN2_74_V9A-v2/00000/0033A97B-8707-E511-9D3B-008CFA1980B8.root')
                                 )
     process.source.inputCommands = cms.untracked.vstring("keep *",
                                                          "drop *_MEtoEDMConverter_*_*")
