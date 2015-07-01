@@ -11,7 +11,7 @@ process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load('Configuration/EventContent/EventContent_cff')
 process.load('TrackingTools/TransientTrack/TransientTrackBuilder_cfi')
 
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.GlobalTag.globaltag = 'MCRUN2_74_V9A::All'
 
 #process.load("RecoTauTag/Configuration/RecoPFTauTag_cff")
@@ -21,6 +21,7 @@ process.GlobalTag.globaltag = 'MCRUN2_74_V9A::All'
 
 process.load('BaconProd/Ntupler/myMETFilters_cff')        # apply MET filters set to tagging mode
 #process.load('BaconProd/Ntupler/myMVAMet_cff')            # MVA MET
+process.load('RecoMET.METPUSubtraction.mvaPFMET_cff') # MVA MET from Stephanie
 process.load("BaconProd/Ntupler/myPFMETCorrections_cff")  # PF MET corrections
 #process.pfJetMETcorr.jetCorrLabel = cms.string("ak5PFL1FastL2L3")
 
@@ -38,9 +39,9 @@ for line in hlt_file.readlines():
     hlt_path = line.split()[0]
     process.hltHighLevel.HLTPaths.extend(cms.untracked.vstring(hlt_path))
     
-    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
     process.source = cms.Source("PoolSource",
-                                fileNames = cms.untracked.vstring('root://eoscms//store/mc/RunIISpring15DR74/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/AODSIM/Asympt50ns_MCRUN2_74_V9A-v1/70000/162B6D42-C5FE-E411-BBE1-02163E013BBE.root')
+                                fileNames = cms.untracked.vstring('/store/mc/RunIISpring15DR74/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/AODSIM/Asympt50ns_MCRUN2_74_V9A-v1/00000/0078400B-12FD-E411-8407-0025904C6374.root')
                                 )
     process.source.inputCommands = cms.untracked.vstring("keep *",
                                                          "drop *_MEtoEDMConverter_*_*")
@@ -67,7 +68,7 @@ for line in hlt_file.readlines():
         edmBeamspotName      = cms.untracked.string('offlineBeamSpot'),
         edmPFMETName         = cms.untracked.string('pfMet'),
         edmPFMETCorrName     = cms.untracked.string('pfType1CorrectedMet'),
-        #    edmMVAMETName        = cms.untracked.string('pfMEtMVA'),
+        edmMVAMETName        = cms.untracked.string('pfMVAMEt'),
         #    edmMVAMETUnityName   = cms.untracked.string('pfMEtMVAUnity'),
         #    edmMVAMETNoSmearName = cms.untracked.string('pfMEtMVANoSmear'),
         edmRhoForIsoName     = cms.untracked.string('fixedGridRhoFastjetAll'),
@@ -194,6 +195,7 @@ for line in hlt_file.readlines():
     process.baconSequence = cms.Sequence(#process.PFBRECO*
       #process.puppi*
       process.metFilters*
+      process.pfMVAMEtSequence* #MVA MET from Stephanie
       #process.producePFMETCorrections*
       #process.recojetsequence*
       #process.genjetsequence*
