@@ -14,10 +14,8 @@ from ksung25, csa14 version
   git cms-addpkg CommonTools/PileupAlgos
   
   
-  git cms-merge-topic nhanvtran:puppi-etadep-741-v2
+  git cms-merge-topic nhanvtran:puppi-etadep-741-v1
   
   
   
 Use config file crab/makingBaconPuppiMVAMets_MC.py to include MVA and PUPPI calculations
-
-## Side note: in MVA MET calculation, the only leptons at the moment are muons... others will be added soon
