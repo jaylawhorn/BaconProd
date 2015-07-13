@@ -24,7 +24,7 @@ FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig):
   fBSName     (iConfig.getUntrackedParameter<std::string>("edmBeamspotName","offlineBeamSpot")),
   fPFMETName  (iConfig.getUntrackedParameter<std::string>("edmPFMETName","pfMet")),
   fPFMETCName (iConfig.getUntrackedParameter<std::string>("edmPFMETCorrName","pfType1CorrectedMet")),
-  fPuppETName (iConfig.getUntrackedParameter<std::string>("edmPuppETName","puppEt")),
+//   fPuppETName (iConfig.getUntrackedParameter<std::string>("edmPuppETName","puppEt")),
   fMVAMETName (iConfig.getUntrackedParameter<std::string>("edmMVAMETName","pfMEtMVA")),
 //  fMVAMETUName(iConfig.getUntrackedParameter<std::string>("edmMVAMETUnityName","pfMEtMVAUnity")),
 //  fMVAMET0Name(iConfig.getUntrackedParameter<std::string>("edmMVAMETNoSmearName","pfMEtMVANoSmear")),
@@ -266,12 +266,12 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
   
    
     // ============ Puppi Party ===================
-    edm::Handle<reco::PFMETCollection> hPuppET;
-    iEvent.getByLabel(fPuppETName,hPuppET);
-    assert(hPuppET.isValid());
-    const reco::PFMET &inPuppET = hPuppET.product()->front();
-    evtInfo->puppET      = inPuppET.pt();
-    evtInfo->puppETphi   = inPuppET.phi();
+//     edm::Handle<reco::PFMETCollection> hPuppET;
+//     iEvent.getByLabel(fPuppETName,hPuppET);
+//     assert(hPuppET.isValid());
+//     const reco::PFMET &inPuppET = hPuppET.product()->front();
+//     evtInfo->puppET      = inPuppET.pt();
+//     evtInfo->puppETphi   = inPuppET.phi();
 //     evtInfo->puppETCov00 = inPuppET.getSignificanceMatrix()(0,0);
 //     evtInfo->puppETCov01 = inPuppET.getSignificanceMatrix()(0,1);
 //     evtInfo->puppETCov11 = inPuppET.getSignificanceMatrix()(1,1);
