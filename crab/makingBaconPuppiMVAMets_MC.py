@@ -8,13 +8,13 @@ process.load('FWCore/MessageService/MessageLogger_cfi')
 process.load('Configuration/StandardSequences/GeometryDB_cff')
 process.load('Configuration/StandardSequences/MagneticField_38T_cff')
 process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
-process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_condDBv2_cff')
+#process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_condDBv2_cff')
 process.load('Configuration/EventContent/EventContent_cff')
 process.load('TrackingTools/TransientTrack/TransientTrackBuilder_cfi')
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 #process.GlobalTag.globaltag = 'GR_P_V56'
-process.GlobalTag.globaltag = 'MCRUN2_74_V9'
+process.GlobalTag.globaltag = 'MCRUN2_74_V9A::All'
 #process.load("RecoTauTag/Configuration/RecoPFTauTag_cff")
 
 # import custom configurations
