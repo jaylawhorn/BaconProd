@@ -8,12 +8,13 @@ process.load('FWCore/MessageService/MessageLogger_cfi')
 process.load('Configuration/StandardSequences/GeometryDB_cff')
 process.load('Configuration/StandardSequences/MagneticField_38T_cff')
 process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
+process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_condDBv2_cff')
 process.load('Configuration/EventContent/EventContent_cff')
 process.load('TrackingTools/TransientTrack/TransientTrackBuilder_cfi')
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
-process.GlobalTag.globaltag = 'MCRUN2_74_V9A::All'
-
+#process.GlobalTag.globaltag = 'GR_P_V56'
+process.GlobalTag.globaltag = 'MCRUN2_74_V9'
 #process.load("RecoTauTag/Configuration/RecoPFTauTag_cff")
 
 # import custom configurations
@@ -45,8 +46,6 @@ process.hltHighLevel.throw = cms.bool(False)
 process.hltHighLevel.HLTPaths = cms.vstring()
 
 process.pfMVAMEt.isTestSample = cms.bool(False)
-#process.pfMVAMEt.srcLeptons = cms.VInputTag("muons")
-process.pfMVAMEt.minCorrJetPt = cms.double(30)
 
 hlt_file = open(cmssw_base + "/src/" + hlt_filename, "r")
 for line in hlt_file.readlines():
@@ -55,7 +54,8 @@ for line in hlt_file.readlines():
     hlt_path = line.split()[0]
     process.hltHighLevel.HLTPaths.extend(cms.untracked.vstring(hlt_path))
     
-    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20) )
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+    #process.skipEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
     process.source = cms.Source("PoolSource",
                                 fileNames = cms.untracked.vstring('/store/data/Run2015B/SingleMuon/AOD/PromptReco-v1/000/251/164/00000/8ED97ACC-A226-E511-8158-02163E012A2C.root')
                                 )
