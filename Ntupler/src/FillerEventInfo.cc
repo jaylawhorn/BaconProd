@@ -26,7 +26,7 @@ FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig):
   fPFMETCName (iConfig.getUntrackedParameter<std::string>("edmPFMETCorrName","pfType1CorrectedMet")),
   fPuppETName (iConfig.getUntrackedParameter<std::string>("edmPuppETName","puppEt")),
   fMVAMETName (iConfig.getUntrackedParameter<std::string>("edmMVAMETName","pfMEtMVA")),
-//  fMVAMETUName(iConfig.getUntrackedParameter<std::string>("edmMVAMETUnityName","pfMEtMVAUnity")),
+  fCHMETName(iConfig.getUntrackedParameter<std::string>("edmTrackMET","pfChMEt")),
 //  fMVAMET0Name(iConfig.getUntrackedParameter<std::string>("edmMVAMETNoSmearName","pfMEtMVANoSmear")),
   fRhoIsoName (iConfig.getUntrackedParameter<std::string>("edmRhoForIsoName","fixedGridRhoFastjetAll")),
   fRhoJetName (iConfig.getUntrackedParameter<std::string>("edmRhoForJetEnergy","fixedGridRhoFastjetAll")),
@@ -220,12 +220,12 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
 //    evtInfo->pfMETCov11 = inPFMET.getSignificanceMatrix()(1,1);
 
     // Corrected PF MET
-    //edm::Handle<reco::PFMETCollection> hPFMETCProduct;
-    //iEvent.getByLabel(fPFMETCName,hPFMETCProduct);
-    //assert(hPFMETCProduct.isValid());
-    //const reco::PFMET &inPFMETC = hPFMETCProduct.product()->front();
-    evtInfo->pfMETC      = 0.0;//inPFMETC.pt();
-    evtInfo->pfMETCphi   = 0.0;//inPFMETC.phi();
+    edm::Handle<reco::PFMETCollection> hPFMETCProduct;
+    iEvent.getByLabel(fPFMETCName,hPFMETCProduct);
+    assert(hPFMETCProduct.isValid());
+    const reco::PFMET &inPFMETC = hPFMETCProduct.product()->front();
+    evtInfo->pfMETC      = inPFMETC.pt();
+    evtInfo->pfMETCphi   = inPFMETC.phi();
 //    evtInfo->pfMETCCov00 = inPFMETC.getSignificanceMatrix()(0,0);
 //    evtInfo->pfMETCCov01 = inPFMETC.getSignificanceMatrix()(0,1);
 //    evtInfo->pfMETCCov11 = inPFMETC.getSignificanceMatrix()(1,1);
@@ -266,23 +266,29 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
   
    
     // ============ Puppi Party ===================
-    edm::Handle<reco::PFMETCollection> hPuppET;
-    iEvent.getByLabel(fPuppETName,hPuppET);
-    assert(hPuppET.isValid());
-    const reco::PFMET &inPuppET = hPuppET.product()->front();
-    evtInfo->puppET      = inPuppET.pt();
-    evtInfo->puppETphi   = inPuppET.phi();
+    //edm::Handle<reco::PFMETCollection> hPuppET;
+    //iEvent.getByLabel(fPuppETName,hPuppET);
+    //assert(hPuppET.isValid());
+    //const reco::PFMET &inPuppET = hPuppET.product()->front();
+    evtInfo->puppET      = 0.0;//inPuppET.pt();
+    evtInfo->puppETphi   = 0.0;//inPuppET.phi();
 //     evtInfo->puppETCov00 = inPuppET.getSignificanceMatrix()(0,0);
 //     evtInfo->puppETCov01 = inPuppET.getSignificanceMatrix()(0,1);
 //     evtInfo->puppETCov11 = inPuppET.getSignificanceMatrix()(1,1);
   
   
     // Track MET
-    edm::Handle<reco::PFCandidateCollection> hPFCandProduct;
-    iEvent.getByLabel(fPFCandName,hPFCandProduct);
-    assert(hPFCandProduct.isValid());
-    const reco::PFCandidateCollection *pfCandCol = hPFCandProduct.product();
-    computeTrackMET(pv, pfCandCol, evtInfo->trkMET, evtInfo->trkMETphi);    
+    edm::Handle<reco::PFMETCollection> hPFChMETProduct;
+    iEvent.getByLabel(fCHMETName,hPFChMETProduct);
+    assert(hPFChMETProduct.isValid());
+    const reco::PFMET &inPFChMET = hPFChMETProduct.product()->front();
+    evtInfo->trkMET      = inPFChMET.pt();
+    evtInfo->trkMETphi   = inPFChMET.phi();
+    //edm::Handle<reco::PFCandidateCollection> hPFCandProduct;
+    //iEvent.getByLabel(fPFCandName,hPFCandProduct);
+    //assert(hPFCandProduct.isValid());
+    //const reco::PFCandidateCollection *pfCandCol = hPFCandProduct.product();
+    //computeTrackMET(pv, pfCandCol, evtInfo->trkMET, evtInfo->trkMETphi);    
   }
   
   
