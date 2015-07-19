@@ -11,7 +11,7 @@ process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load('Configuration/EventContent/EventContent_cff')
 process.load('TrackingTools/TransientTrack/TransientTrackBuilder_cfi')
 
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.GlobalTag.globaltag = 'MCRUN2_74_V9A::All'
 
 #process.load("RecoTauTag/Configuration/RecoPFTauTag_cff")
@@ -21,7 +21,6 @@ process.GlobalTag.globaltag = 'MCRUN2_74_V9A::All'
 
 process.load('BaconProd/Ntupler/myMETFilters_cff')        # apply MET filters set to tagging mode
 #process.load('BaconProd/Ntupler/myMVAMet_cff')            # MVA MET
-process.load('RecoMET.METPUSubtraction.mvaPFMET_cff') # MVA MET from Stephanie
 process.load("BaconProd/Ntupler/myPFMETCorrections_cff")  # PF MET corrections
 #process.pfJetMETcorr.jetCorrLabel = cms.string("ak5PFL1FastL2L3")
 
@@ -39,9 +38,9 @@ for line in hlt_file.readlines():
     hlt_path = line.split()[0]
     process.hltHighLevel.HLTPaths.extend(cms.untracked.vstring(hlt_path))
     
-    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
     process.source = cms.Source("PoolSource",
-                                fileNames = cms.untracked.vstring('/store/mc/RunIISpring15DR74/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/AODSIM/Asympt50ns_MCRUN2_74_V9A-v1/00000/0078400B-12FD-E411-8407-0025904C6374.root')
+                                fileNames = cms.untracked.vstring('/store/mc/RunIISpring15DR74/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/AODSIM/Asympt50ns_MCRUN2_74_V9A-v2/00000/0033A97B-8707-E511-9D3B-008CFA1980B8.root')
                                 )
     process.source.inputCommands = cms.untracked.vstring("keep *",
                                                          "drop *_MEtoEDMConverter_*_*")
@@ -52,7 +51,7 @@ for line in hlt_file.readlines():
       fileMode    = cms.untracked.string('NOMERGE')
       )
     
-    is_data_flag = False
+    is_data_flag = True 
     do_hlt_filter = False
     process.ntupler = cms.EDAnalyzer('NtuplerMod',
                                      skipOnHLTFail = cms.untracked.bool(do_hlt_filter),
@@ -68,7 +67,7 @@ for line in hlt_file.readlines():
         edmBeamspotName      = cms.untracked.string('offlineBeamSpot'),
         edmPFMETName         = cms.untracked.string('pfMet'),
         edmPFMETCorrName     = cms.untracked.string('pfType1CorrectedMet'),
-        edmMVAMETName        = cms.untracked.string('pfMVAMEt'),
+        #    edmMVAMETName        = cms.untracked.string('pfMEtMVA'),
         #    edmMVAMETUnityName   = cms.untracked.string('pfMEtMVAUnity'),
         #    edmMVAMETNoSmearName = cms.untracked.string('pfMEtMVANoSmear'),
         edmRhoForIsoName     = cms.untracked.string('fixedGridRhoFastjetAll'),
@@ -99,7 +98,6 @@ for line in hlt_file.readlines():
         edmName                   = cms.untracked.string('gedGsfElectrons'),
         edmPFCandName             = cms.untracked.string('particleFlow'),
         edmTrackName              = cms.untracked.string('generalTracks'),
-        edmBeamspotName           = cms.untracked.string('offlineBeamSpot'),
         edmConversionName         = cms.untracked.string('allConversions'),
         edmSuperClusterName       = cms.untracked.string('particleFlowEGamma')
         ),
@@ -111,8 +109,8 @@ for line in hlt_file.readlines():
         edmPFCandName = cms.untracked.string('particleFlow'),
         
         # save general tracker tracks in our muon collection (used in tag-and-probe for muons)
-        doSaveTracks = cms.untracked.bool(False),
-        minTrackPt   = cms.untracked.double(20),
+        doSaveTracks = cms.untracked.bool(True),
+        minTrackPt   = cms.untracked.double(15),
         edmTrackName = cms.untracked.string('generalTracks')
         
         ),
@@ -196,7 +194,6 @@ for line in hlt_file.readlines():
     process.baconSequence = cms.Sequence(#process.PFBRECO*
       #process.puppi*
       process.metFilters*
-      process.pfMVAMEtSequence* #MVA MET from Stephanie
       #process.producePFMETCorrections*
       #process.recojetsequence*
       #process.genjetsequence*

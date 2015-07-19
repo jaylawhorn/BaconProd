@@ -2,30 +2,31 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'MC_analysis_wm_new_pu20'
-config.General.workArea = 'crab_projects7'
+config.General.requestName = 'data7'
+config.General.workArea = 'singleele'
 
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
 #config.JobType.psetName = 'selectWe_cfg.py'
-config.JobType.psetName = 'selectWm_cfg.py'
-config.JobType.outputFiles = ['output.root']
+#config.JobType.psetName = 'makingBaconPuppiMVAMets_MC.py'
+config.JobType.psetName = 'makingBaconPuppiMVAMets_DATA.py'
+config.JobType.outputFiles = ['Output.root']
 config.section_("Data")
-#config.Data.inputDataset = '/DYJetsToLL_M-50_13TeV-madgraph-pythia8/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM'
-#config.Data.inputDataset = '/DYJetsToLL_M-50_13TeV-madgraph-pythia8/Phys14DR-PU4bx50_PHYS14_25_V1-v1/MINIAODSIM'
-config.Data.inputDataset = '/WJetsToLNu_13TeV-madgraph-pythia8-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM'
-#config.Data.inputDataset = '/WJetsToLNu_13TeV-madgraph-pythia8-tauola/Phys14DR-PU4bx50_PHYS14_25_V1-v1/MINIAODSIM'
-#config.Data.inputDataset='/QCD_Pt-30to80_EMEnriched_Tune4C_13TeV_pythia8/Phys14DR-PU20bx25_castor_PHYS14_25_V1-v1/MINIAODSIM'
-#config.Data.inputDataset='/QCD_Pt-80to170_EMEnriched_Tune4C_13TeV_pythia8/Phys14DR-PU20bx25_castor_PHYS14_25_V1-v1/MINIAODSIM'
-#config.Data.inputDataset='/QCD_Pt-80to170_EMEnriched_Tune4C_13TeV_pythia8/Phys14DR-PU4bx50_castor_PHYS14_25_V1-v1/MINIAODSIM'
-#config.Data.inputDataset='/QCD_Pt-30to80_EMEnriched_Tune4C_13TeV_pythia8/Phys14DR-PU4bx50_castor_PHYS14_25_V1-v1/MINIAODSIM'
+#config.Data.inputDataset = '/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/AODSIM'
+#config.Data.inputDataset = '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/AODSIM'
+#config.Data.inputDataset = '/ExpressPhysics/Run2015A-Express-v1/FEVT'
+#config.Data.inputDataset = '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/AODSIM'
+config.Data.inputDataset = '/SingleElectron/Run2015B-PromptReco-v1/AOD'
+#config.Data.inputDataset = '/WWTo2L2Nu_13TeV-powheg/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/AODSIM'
+#config.Data.inputDataset = '/WZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/AODSIM'
+#config.Data.inputDataset = '/ZZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/AODSIM'
+#config.Data.inputDataset = '/QCD_Pt-20toInf_MuEnrichedPt15_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/AODSIM'
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 1 
-config.Data.outLFN = '/store/user/arapyan/Phys14_final_new/muons/PU20bx25' # or '/store/group/<subdir>'
-#config.Data.outLFN = '/store/user/arapyan/phys14/electrons/PU20bx25' # or '/store/group/<subdir>'
+config.Data.outLFNDirBase = '/store/user/arapyan/Run2' # or '/store/group/<subdir>'
 config.Data.publication = False
-config.Data.publishDataName = 'Phys14_samples'
+config.Data.publishDataName = 'Samples'
 
 config.section_("Site")
 config.Site.storageSite = 'T2_CH_CERN'

@@ -151,6 +151,10 @@ void FillerElectron::fill(TClonesArray *array,
       pElectron->d0 = (-1)*(gsfTrack->dxy(pv.position()));
       pElectron->dz = gsfTrack->dz(pv.position());
 
+      pElectron->chi2 = gsfTrack->chi2();
+      pElectron->ndof = gsfTrack->ndof();
+      pElectron->npixmatch = -9;
+
 /** double check recipe **/
       const reco::TransientTrack &tt = transientTrackBuilder->build(gsfTrack);
       const double gsfsign = (pElectron->d0 >= 0) ? 1. : -1.;

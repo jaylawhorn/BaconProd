@@ -272,8 +272,8 @@ void FillerMuon::fill(TClonesArray *array,
       pMuon->nTkLayers    = itTrk->hitPattern().trackerLayersWithMeasurement();
       pMuon->nPixLayers   = itTrk->hitPattern().pixelLayersWithMeasurement();
       pMuon->nMatchStn    = 0;
-      pMuon->trkID        = trkIndex;
-      pMuon->hltMatchBits = TriggerTools::matchHLT(pMuon->eta, pMuon->phi, triggerRecords, triggerEvent);
+      pMuon->trkID        = 0;//trkIndex;
+      pMuon->hltMatchBits = 0;//TriggerTools::matchHLT(pMuon->eta, pMuon->phi, triggerRecords, triggerEvent);
     }    
   } 
 }

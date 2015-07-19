@@ -24,7 +24,7 @@ FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig):
   fBSName     (iConfig.getUntrackedParameter<std::string>("edmBeamspotName","offlineBeamSpot")),
   fPFMETName  (iConfig.getUntrackedParameter<std::string>("edmPFMETName","pfMet")),
   fPFMETCName (iConfig.getUntrackedParameter<std::string>("edmPFMETCorrName","pfType1CorrectedMet")),
-  fPuppETName (iConfig.getUntrackedParameter<std::string>("edmPuppETName","puppEt")),
+//   fPuppETName (iConfig.getUntrackedParameter<std::string>("edmPuppETName","puppEt")),
   fMVAMETName (iConfig.getUntrackedParameter<std::string>("edmMVAMETName","pfMEtMVA")),
   fCHMETName(iConfig.getUntrackedParameter<std::string>("edmTrackMET","pfChMEt")),
 //  fMVAMET0Name(iConfig.getUntrackedParameter<std::string>("edmMVAMETNoSmearName","pfMEtMVANoSmear")),
@@ -272,9 +272,9 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     //const reco::PFMET &inPuppET = hPuppET.product()->front();
     evtInfo->puppET      = 0.0;//inPuppET.pt();
     evtInfo->puppETphi   = 0.0;//inPuppET.phi();
-//     evtInfo->puppETCov00 = inPuppET.getSignificanceMatrix()(0,0);
-//     evtInfo->puppETCov01 = inPuppET.getSignificanceMatrix()(0,1);
-//     evtInfo->puppETCov11 = inPuppET.getSignificanceMatrix()(1,1);
+//  evtInfo->puppETCov00 = inPuppET.getSignificanceMatrix()(0,0);
+//  evtInfo->puppETCov01 = inPuppET.getSignificanceMatrix()(0,1);
+//   evtInfo->puppETCov11 = inPuppET.getSignificanceMatrix()(1,1);
   
   
     // Track MET
