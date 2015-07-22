@@ -50,7 +50,7 @@ process.hltHighLevel.HLTPaths = cms.vstring()
 
 process.pfMVAMEt.isTestSample = cms.bool(False)
 #process.pfMVAMEt.srcLeptons = cms.VInputTag("muons")
-process.pfMVAMEt.minCorrJetPt = cms.double(30)
+#process.pfMVAMEt.minCorrJetPt = cms.double(30)
 
 hlt_file = open(cmssw_base + "/src/" + hlt_filename, "r")
 for line in hlt_file.readlines():
