@@ -13,8 +13,9 @@ process.load('Configuration/EventContent/EventContent_cff')
 process.load('TrackingTools/TransientTrack/TransientTrackBuilder_cfi')
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
-#process.GlobalTag.globaltag = 'GR_P_V56'
-process.GlobalTag.globaltag = 'MCRUN2_74_V9A::All'
+process.GlobalTag.globaltag = 'GR_P_V56::All'
+#process.GlobalTag.globaltag = 'MCRUN2_74_V9A::All'
+#process.GlobalTag.globaltag = 'Summer14_50nsV2::All'
 #process.load("RecoTauTag/Configuration/RecoPFTauTag_cff")
 
 # import custom configurations
@@ -54,7 +55,7 @@ for line in hlt_file.readlines():
     hlt_path = line.split()[0]
     process.hltHighLevel.HLTPaths.extend(cms.untracked.vstring(hlt_path))
 
-    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
     process.source = cms.Source("PoolSource",
                                 fileNames = cms.untracked.vstring('/store/mc/RunIISpring15DR74/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/AODSIM/Asympt50ns_MCRUN2_74_V9A-v2/00000/0033A97B-8707-E511-9D3B-008CFA1980B8.root')
                                 )
@@ -156,9 +157,9 @@ for line in hlt_file.readlines():
                                      #    edmRhoForRingIso = cms.untracked.string('kt6PFJets')
                                      #  ),
                                      
-        #Jet = cms.untracked.PSet(
-        #isActive             = cms.untracked.bool(True),
-        #minPt                = cms.untracked.double(20),
+                                     Jet = cms.untracked.PSet(
+        isActive             = cms.untracked.bool(False),
+        minPt                = cms.untracked.double(20),
         ##    doComputeFullJetInfo = cms.untracked.bool(True),
         ##    doGenJet             = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
         ##    
@@ -168,18 +169,18 @@ for line in hlt_file.readlines():
         #edmPVName = cms.untracked.string('offlinePrimaryVertices'),
         ##    
         ## ORDERED lists of jet energy correction input files
-        #jecFiles = ( cms.untracked.vstring('dummy.txt',
-                                           #'dummy.txt',
-                                           #'dummy.txt',
-                                           #'dummy.txt')
+        jecFiles = ( cms.untracked.vstring('BaconProd/Utils/data/Summer15_50nsV2_MC_L1FastJet_AK4PF.txt',
+                                           'BaconProd/Utils/data/Summer15_50nsV2_MC_L2Relative_AK4PF.txt',
+                                           'BaconProd/Utils/data/Summer15_50nsV2_MC_L3Absolute_AK4PF.txt')
+                     ),
                      #if is_data_flag else 
                      #cms.untracked.vstring('BaconProd/Utils/data/PHYS14_V1_MC_L1FastJet_AK4PF.txt',
-                                           #'BaconProd/Utils/data/PHYS14_V1_MC_L2Relative_AK4PF.txt',
-                                           #'BaconProd/Utils/data/PHYS14_V1_MC_L3Absolute_AK4PF.txt')
+                     #'BaconProd/Utils/data/PHYS14_V1_MC_L2Relative_AK4PF.txt',
+                     #'BaconProd/Utils/data/PHYS14_V1_MC_L3Absolute_AK4PF.txt')
                      #),
-        #jecUncFiles = ( cms.untracked.vstring('dummy.txt')
-                        #if is_data_flag else
-                        #cms.untracked.vstring('dummy.txt')
+                     #jecUncFiles = ( cms.untracked.vstring('dummy.txt')
+                     #if is_data_flag else
+                     #cms.untracked.vstring('dummy.txt')
                         #),
         #edmRhoName = cms.untracked.string('fixedGridRhoFastjetAll'),
         ##    
@@ -207,6 +208,7 @@ for line in hlt_file.readlines():
                                      #    edmPVName      = cms.untracked.string('offlinePrimaryVertices'),
                                      #    doAddDepthTime = cms.untracked.bool(False)
                                      #  )
+        )
                                      )
     
     process.baconSequence = cms.Sequence(#process.PFBRECO*
