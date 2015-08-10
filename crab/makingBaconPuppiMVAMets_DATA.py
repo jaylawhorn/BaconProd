@@ -23,7 +23,7 @@ process.GlobalTag.globaltag = 'GR_P_V56::All'
 #process.load('BaconProd/Ntupler/myJetExtras04_cff')    # include gen jets and b-tagging
 
 process.load('BaconProd/Ntupler/myMETFilters_cff')        # apply MET filters set to tagging mode
-process.load('RecoMET.METPUSubtraction.mvaPFMET_cff')     # MVA MET from Stephanie
+process.load('RecoMET.METPUSubtraction.mvaPFMET30_cff')     # MVA MET from Stephanie
 process.load("BaconProd/Ntupler/myPFMETCorrections_cff")  # PF MET corrections
 
 #process.pfJetMETcorr.jetCorrLabel = cms.string("ak5PFL1FastL2L3")
@@ -59,7 +59,7 @@ for line in hlt_file.readlines():
     hlt_path = line.split()[0]
     process.hltHighLevel.HLTPaths.extend(cms.untracked.vstring(hlt_path))
     
-    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
     process.source = cms.Source("PoolSource",
                                 fileNames = cms.untracked.vstring('/store/data/Run2015B/SingleMuon/AOD/PromptReco-v1/000/251/167/00000/CA03B6AC-A826-E511-89FA-02163E011C12.root')
                                 )
@@ -89,7 +89,7 @@ for line in hlt_file.readlines():
         edmPFMETName         = cms.untracked.string('pfMet'),
         #edmPFMETCorrName     = cms.untracked.string('pfType1CorrectedMet'),
         edmPFMETCorrName     = cms.untracked.string('pfMetT1'),
-        edmMVAMETName        = cms.untracked.string('pfMVAMEt'),
+        edmMVAMETName        = cms.untracked.string('pfMVAMEt30'),
         edmPuppETName        = cms.untracked.string('pfMetPuppi'),
         edmTrackMET          = cms.untracked.string('pfChMet'),
         edmRhoForIsoName     = cms.untracked.string('fixedGridRhoFastjetAll'),
@@ -216,7 +216,7 @@ for line in hlt_file.readlines():
     
     process.baconSequence = cms.Sequence(#process.PFBRECO*
       process.metFilters*
-      process.pfMVAMEtSequence* #MVA MET
+      process.pfMVAMEt30Sequence* #MVA MET
       process.producePFMETCorrections*
       #process.puppi* #  puppi
       #process.pfMetPuppi* #  Puppi Met
