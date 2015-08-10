@@ -22,7 +22,7 @@ process.GlobalTag.globaltag = 'GR_P_V56::All'
 #process.load('BaconProd/Ntupler/myJetExtras04_cff')    # include gen jets and b-tagging
 
 process.load('BaconProd/Ntupler/myMETFilters_cff')        # apply MET filters set to tagging mode
-process.load('RecoMET.METPUSubtraction.mvaPFMET_cff')     # MVA MET from Stephanie
+process.load('RecoMET.METPUSubtraction.mvaPFMET30_cff')     # MVA MET from Stephanie
 process.load("BaconProd/Ntupler/myPFMETCorrections_cff")  # PF MET corrections
 #process.pfJetMETcorr.jetCorrLabel = cms.string("ak5PFL1FastL2L3")
 
@@ -55,9 +55,11 @@ for line in hlt_file.readlines():
     hlt_path = line.split()[0]
     process.hltHighLevel.HLTPaths.extend(cms.untracked.vstring(hlt_path))
 
-    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
     process.source = cms.Source("PoolSource",
-                                fileNames = cms.untracked.vstring('/store/mc/RunIISpring15DR74/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/AODSIM/Asympt50ns_MCRUN2_74_V9A-v2/00000/0033A97B-8707-E511-9D3B-008CFA1980B8.root')
+                                  fileNames = cms.untracked.vstring(
+                                  'file:0033A97B-8707-E511-9D3B-008CFA1980B8.root'
+                                  )
                                 )
     process.source.inputCommands = cms.untracked.vstring("keep *",
                                                          "drop *_MEtoEDMConverter_*_*")
@@ -72,7 +74,7 @@ for line in hlt_file.readlines():
     do_hlt_filter = False
     process.ntupler = cms.EDAnalyzer('NtuplerMod',
                                      skipOnHLTFail = cms.untracked.bool(do_hlt_filter),
-                                     outputName    = cms.untracked.string('Output.root'),
+                                     outputName    = cms.untracked.string('Outputofficial.root'),
                                      TriggerFile   = cms.untracked.string(hlt_filename),
                                      edmPVName     = cms.untracked.string('offlinePrimaryVertices'),
                                      edmPFCandName = cms.untracked.string('particleFlow'),
@@ -85,7 +87,7 @@ for line in hlt_file.readlines():
         edmPFMETName         = cms.untracked.string('pfMet'),
         #edmPFMETCorrName     = cms.untracked.string('pfType1CorrectedMet'),
         edmPFMETCorrName     = cms.untracked.string('pfMetT1'),
-        edmMVAMETName        = cms.untracked.string('pfMVAMEt'),
+        edmMVAMETName        = cms.untracked.string('pfMVAMEt30'),
         edmPuppETName        = cms.untracked.string('pfMetPuppi'),
         edmTrackMET          = cms.untracked.string('pfChMet'),
         edmRhoForIsoName     = cms.untracked.string('fixedGridRhoFastjetAll'),
@@ -134,7 +136,7 @@ for line in hlt_file.readlines():
         
         ),
                                      
-                                     Photon = cms.untracked.PSet(
+      Photon = cms.untracked.PSet(
         isActive               = cms.untracked.bool(True),
         minPt                  = cms.untracked.double(10),
         edmName                = cms.untracked.string('gedPhotons'),
@@ -157,7 +159,7 @@ for line in hlt_file.readlines():
                                      #    edmRhoForRingIso = cms.untracked.string('kt6PFJets')
                                      #  ),
                                      
-                                     Jet = cms.untracked.PSet(
+      Jet = cms.untracked.PSet(
         isActive             = cms.untracked.bool(False),
         minPt                = cms.untracked.double(20),
         ##    doComputeFullJetInfo = cms.untracked.bool(True),
@@ -213,7 +215,7 @@ for line in hlt_file.readlines():
     
     process.baconSequence = cms.Sequence(#process.PFBRECO*
       process.metFilters*
-      process.pfMVAMEtSequence* #MVA ME
+      process.pfMVAMEt30Sequence* #MVA ME
       process.producePFMETCorrections*
       #process.puppi* #  puppi
       #process.pfMetPuppi* #  Puppi Met
