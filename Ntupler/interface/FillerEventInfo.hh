@@ -43,7 +43,7 @@ namespace baconhep
       std::string fBSName;
       std::string fPFMETName;
       std::string fPFMETCName;
-//       std::string fPuppETName;
+      std::string fPuppETName;
       std::string fMVAMETName;
       std::string fCHMETName;
 //      std::string fMVAMET0Name;

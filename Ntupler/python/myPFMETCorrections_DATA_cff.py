@@ -24,6 +24,7 @@ pfMetT1 = cms.EDProducer(
     ),
 )   
 
+#-------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------
 # define sequence to run all modules
 producePFMETCorrections = cms.Sequence(
@@ -42,14 +43,12 @@ pfJetMETcorrPuppi = corrPfMetType1.clone(
 
 pfType1PuppiCorrectedMet = pfMetT1.clone(
     src = cms.InputTag('pfMetPuppi'),
-    srcCorrections = cms.VInputTag(
+     srcCorrections = cms.VInputTag(
         cms.InputTag('pfJetMETcorrPuppi30', 'type1')
         ),
     )
 
-#--------------------------------------------------------------------------------
-# define sequence to run all modules
-producePFMETCorrectionsPuppiMC = cms.Sequence(
-    pfJetMETcorrPuppi  +
-    pfType1PuppiCorrectedMet
+producePFMETCorrectionsPuppiData = cms.Sequence(
+  pfJetMETcorrPuppi +
+  pfType1PuppiCorrectedMet
 )

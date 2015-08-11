@@ -13,9 +13,8 @@ process.load('Configuration/EventContent/EventContent_cff')
 process.load('TrackingTools/TransientTrack/TransientTrackBuilder_cfi')
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
-process.GlobalTag.globaltag = 'GR_P_V56::All'
-#process.GlobalTag.globaltag = 'MCRUN2_74_V9A::All'
-#process.GlobalTag.globaltag = 'Summer14_50nsV2::All'
+process.GlobalTag.globaltag = 'MCRUN2_74_V9A::All'
+
 #process.load("RecoTauTag/Configuration/RecoPFTauTag_cff")
 
 # import custom configurations
@@ -25,18 +24,6 @@ process.load('BaconProd/Ntupler/myMETFilters_cff')        # apply MET filters se
 process.load('RecoMET.METPUSubtraction.mvaPFMET30_cff')     # MVA MET from Stephanie
 process.load("BaconProd/Ntupler/myPFMETCorrections_cff")  # PF MET corrections
 #process.pfJetMETcorr.jetCorrLabel = cms.string("ak5PFL1FastL2L3")
-
-## load Puppi stuff
-#process.load('CommonTools/PileupAlgos/Puppi_cff') 
-### e.g. to run on miniAOD
-#process.puppi.candName = cms.InputTag('particleFlow')
-#process.puppi.vertexName = cms.InputTag('offlinePrimaryVertices')
-
-# Include the stuff for Puppi MET
-from RecoMET.METProducers.PFMET_cfi import pfMet
-#process.pfMetPuppi = pfMet.clone();
-#process.pfMetPuppi.src = cms.InputTag('puppi')
-
 
 # trigger filter
 import os
@@ -48,12 +35,25 @@ process.hltHighLevel.HLTPaths = cms.vstring()
 
 process.pfMVAMEt.isTestSample = cms.bool(False)
 
+from RecoMET.METProducers.PFMET_cfi import pfMet
 process.packedPFCandidates30 = cms.EDFilter("CandPtrSelector",
                                             src = cms.InputTag("particleFlow"),
                                             cut = cms.string("abs(eta) < 3.0"))
 process.pfMet30                      = pfMet.clone();
 process.pfMet30.src                  = cms.InputTag('packedPFCandidates30')
 
+## load Puppi stuff
+#PUPPI JEC
+process.load('CommonTools/PileupAlgos/Puppi_cff') 
+process.pfCandNoLep = cms.EDFilter("CandPtrSelector", src = cms.InputTag("packedPFCandidates30"), cut = cms.string("abs(pdgId) != 13 && abs(pdgId) != 11 && abs(pdgId) != 15"))
+process.puppinolep = process.puppi.clone()
+process.puppinolep.candName = 'pfCandNoLep'
+# Include the stuff for Puppi MET
+process.pfMetPuppi = pfMet.clone();
+process.pfMetPuppi.src = cms.InputTag('puppinolep')
+process.pfMetPuppi.calculateSignificance = False
+#process.pfJetMETcorrPuppi.jetCorrLabel = cms.InputTag("ak4PuppiL1FastL2L3Corrector")
+#process.producePFMETCorrectionsPuppi = cms.Sequence(process.producePFMETCorrectionsPuppiMC)
 
 hlt_file = open(cmssw_base + "/src/" + hlt_filename, "r")
 for line in hlt_file.readlines():
@@ -64,8 +64,7 @@ for line in hlt_file.readlines():
 
     process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
     process.source = cms.Source("PoolSource",
-                                  fileNames = cms.untracked.vstring(
-                                  'file:0033A97B-8707-E511-9D3B-008CFA1980B8.root'
+                                  fileNames = cms.untracked.vstring('/store/mc/RunIISpring15DR74/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/AODSIM/Asympt50ns_MCRUN2_74_V9A-v2/00000/0AFC520A-8607-E511-B099-001517FB20EC.root'
                                   )
                                 )
     process.source.inputCommands = cms.untracked.vstring("keep *",
@@ -81,7 +80,7 @@ is_data_flag = False
 do_hlt_filter = False
 process.ntupler = cms.EDAnalyzer('NtuplerMod',
                                  skipOnHLTFail = cms.untracked.bool(do_hlt_filter),
-                                 outputName    = cms.untracked.string('Outputofficial.root'),
+                                 outputName    = cms.untracked.string('Output.root'),
                                  TriggerFile   = cms.untracked.string(hlt_filename),
                                  edmPVName     = cms.untracked.string('offlinePrimaryVertices'),
                                  edmPFCandName = cms.untracked.string('particleFlow'),
@@ -91,7 +90,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmPFCandName        = cms.untracked.string('particleFlow'),
     edmPileupInfoName    = cms.untracked.string('addPileupInfo'),
     edmBeamspotName      = cms.untracked.string('offlineBeamSpot'),
-    edmPFMETName         = cms.untracked.string('pfMet'),
+    edmPFMETName         = cms.untracked.string('pfMet30'),
     #edmPFMETCorrName     = cms.untracked.string('pfType1CorrectedMet'),
     edmPFMETCorrName     = cms.untracked.string('pfMetT1'),
     edmMVAMETName        = cms.untracked.string('pfMVAMEt30'),
@@ -170,8 +169,8 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
         #    doComputeFullJetInfo = cms.untracked.bool(True),
         #    doGenJet             = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
         #    
-        #    coneSizes = cms.untracked.vdouble(0.5),#,0.8,1.2),
-        #    postFix   = cms.untracked.vstring("CHS"),
+        #coneSizes = cms.untracked.vdouble(0.4),#,0.8,1.2),
+        postFix   = cms.untracked.vstring("CHS"),
         #    
         edmPVName = cms.untracked.string('offlinePrimaryVertices'),
         ##    
@@ -209,12 +208,12 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
         #    qgLikelihoodSubjet = cms.untracked.string('QGTaggerSubJets')
         ),
                                  
-                                 #  PFCand = cms.untracked.PSet(
-                                 #    isActive       = cms.untracked.bool(False),
-                                 #    edmName        = cms.untracked.string('particleFlow'),
-                                 #    edmPVName      = cms.untracked.string('offlinePrimaryVertices'),
-                                 #    doAddDepthTime = cms.untracked.bool(False)
-                                 #  )
+                                 PFCand = cms.untracked.PSet(
+        isActive       = cms.untracked.bool(False),
+        edmName        = cms.untracked.string('particleFlow'),
+        edmPVName      = cms.untracked.string('offlinePrimaryVertices'),
+        doAddDepthTime = cms.untracked.bool(False)
+        )
                                  )
 
 process.baconSequence = cms.Sequence(#process.PFBRECO*
@@ -223,8 +222,10 @@ process.baconSequence = cms.Sequence(#process.PFBRECO*
   process.pfMet30*
   process.pfMVAMEt30Sequence* #MVA ME
   process.producePFMETCorrections*
-  #process.puppi* #  puppi
-  #process.pfMetPuppi* #  Puppi Met
+  process.puppi* #  puppi
+  process.pfCandNoLep*
+  process.puppinolep*
+  process.pfMetPuppi* #  Puppi Met
   #process.producePFMETCorrections*
   #process.recojetsequence*
   #process.genjetsequence*
