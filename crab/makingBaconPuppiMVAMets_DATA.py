@@ -35,7 +35,7 @@ process.load("BaconProd/Ntupler/myPFMETCorrections_cff")  # PF MET corrections
 #process.puppi.vertexName = cms.InputTag('offlinePrimaryVertices')
 
 # Include the stuff for Puppi MET
-#from RecoMET.METProducers.PFMET_cfi import pfMet
+from RecoMET.METProducers.PFMET_cfi import pfMet
 #process.pfMetPuppi = pfMet.clone();
 #process.pfMetPuppi.src = cms.InputTag('puppi')
 
@@ -50,7 +50,13 @@ process.hltHighLevel.HLTPaths = cms.vstring()
 
 process.pfMVAMEt.isTestSample = cms.bool(False)
 #process.pfMVAMEt.srcLeptons = cms.VInputTag("muons")
-process.pfMVAMEt.minCorrJetPt = cms.double(30)
+#process.pfMVAMEt.minCorrJetPt = cms.double(30)
+
+process.packedPFCandidates30 = cms.EDFilter("CandPtrSelector",
+                                            src = cms.InputTag("particleFlow"),
+                                            cut = cms.string("abs(eta) < 3.0"))
+process.pfMet30                      = pfMet.clone();
+process.pfMet30.src                  = cms.InputTag('packedPFCandidates30')
 
 hlt_file = open(cmssw_base + "/src/" + hlt_filename, "r")
 for line in hlt_file.readlines():
@@ -59,9 +65,9 @@ for line in hlt_file.readlines():
     hlt_path = line.split()[0]
     process.hltHighLevel.HLTPaths.extend(cms.untracked.vstring(hlt_path))
     
-    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
     process.source = cms.Source("PoolSource",
-                                fileNames = cms.untracked.vstring('/store/data/Run2015B/SingleMuon/AOD/PromptReco-v1/000/251/167/00000/CA03B6AC-A826-E511-89FA-02163E011C12.root')
+                                fileNames = cms.untracked.vstring('/store/data/Run2015B/SingleMuon/AOD/PromptReco-v1/000/252/126/00000/E6361784-5231-E511-A760-02163E0133FF.root')
                                 )
     process.source.inputCommands = cms.untracked.vstring("keep *",
                                                          "drop *_MEtoEDMConverter_*_*")
@@ -162,8 +168,8 @@ for line in hlt_file.readlines():
                                      #  ),
                                      
                                      Jet = cms.untracked.PSet(
-        isActive             = cms.untracked.bool(False),
-        minPt                = cms.untracked.double(20),
+        isActive             = cms.untracked.bool(True),
+        minPt                = cms.untracked.double(10),
         #    doComputeFullJetInfo = cms.untracked.bool(True),
         #    doGenJet             = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
         #    
@@ -173,10 +179,9 @@ for line in hlt_file.readlines():
         edmPVName = cms.untracked.string('offlinePrimaryVertices'),
         #    
         # ORDERED lists of jet energy correction input files
-        jecFiles = ( cms.untracked.vstring('dummy.txt',
-                                           'dummy.txt',
-                                           'dummy.txt',
-                                           'dummy.txt')
+        jecFiles = ( cms.untracked.vstring('BaconProd/Utils/data/Summer15_50nsV2_MC_L1FastJet_AK4PFchs.txt',
+                                           'BaconProd/Utils/data/Summer15_50nsV2_MC_L2Relative_AK4PFchs.txt',
+                                           'BaconProd/Utils/data/Summer15_50nsV2_MC_L3Absolute_AK4PFchs.txt')
                      if is_data_flag else 
                      cms.untracked.vstring('BaconProd/Utils/data/PHYS14_V1_MC_L1FastJet_AK4PF.txt',
                                            'BaconProd/Utils/data/PHYS14_V1_MC_L2Relative_AK4PF.txt',
@@ -216,8 +221,10 @@ for line in hlt_file.readlines():
     
     process.baconSequence = cms.Sequence(#process.PFBRECO*
       process.metFilters*
-      process.pfMVAMEtSequence* #MVA MET
-      process.producePFMETCorrections*
+      process.packedPFCandidates30*
+      process.pfMet30*
+      #process.pfMVAMEtSequence* #MVA MET
+      #process.producePFMETCorrections*
       #process.puppi* #  puppi
       #process.pfMetPuppi* #  Puppi Met
       #process.producePFMETCorrections*

@@ -226,10 +226,10 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     const reco::PFMET &inPFMETC = hPFMETCProduct.product()->front();
     evtInfo->pfMETC      = inPFMETC.pt();
     evtInfo->pfMETCphi   = inPFMETC.phi();
-//    evtInfo->pfMETCCov00 = inPFMETC.getSignificanceMatrix()(0,0);
-//    evtInfo->pfMETCCov01 = inPFMETC.getSignificanceMatrix()(0,1);
-//    evtInfo->pfMETCCov11 = inPFMETC.getSignificanceMatrix()(1,1);
-   
+    //    evtInfo->pfMETCCov00 = inPFMETC.getSignificanceMatrix()(0,0);
+    //    evtInfo->pfMETCCov01 = inPFMETC.getSignificanceMatrix()(0,1);
+    //    evtInfo->pfMETCCov11 = inPFMETC.getSignificanceMatrix()(1,1);
+    
     //  =============== MVA MET ======================
     edm::Handle<reco::PFMETCollection> hMVAMETProduct;
     iEvent.getByLabel(fMVAMETName,hMVAMETProduct);
@@ -237,20 +237,20 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     const reco::PFMET &inMVAMET = hMVAMETProduct.product()->front();
     evtInfo->mvaMET      = inMVAMET.pt();
     evtInfo->mvaMETphi   = inMVAMET.phi();
-//    evtInfo->mvaMETCov00 = inMVAMET.getSignificanceMatrix()(0,0);
-//    evtInfo->mvaMETCov01 = inMVAMET.getSignificanceMatrix()(0,1);
-//    evtInfo->mvaMETCov11 = inMVAMET.getSignificanceMatrix()(1,1);
+    //    evtInfo->mvaMETCov00 = inMVAMET.getSignificanceMatrix()(0,0);
+    //    evtInfo->mvaMETCov01 = inMVAMET.getSignificanceMatrix()(0,1);
+    //    evtInfo->mvaMETCov11 = inMVAMET.getSignificanceMatrix()(1,1);
     
-//     // MVA MET with unity response
-//     edm::Handle<reco::PFMETCollection> hMVAMETUProduct;
-//     iEvent.getByLabel(fMVAMETUName,hMVAMETUProduct);
-//     assert(hMVAMETUProduct.isValid());
-//     const reco::PFMET &inMVAMETU = hMVAMETUProduct.product()->front();
-//     evtInfo->mvaMETU      = inMVAMETU.pt();
-//     evtInfo->mvaMETUphi   = inMVAMETU.phi();
-// //    evtInfo->mvaMETUCov00 = inMVAMETU.getSignificanceMatrix()(0,0);
-// //    evtInfo->mvaMETUCov01 = inMVAMETU.getSignificanceMatrix()(0,1);
-// //    evtInfo->mvaMETUCov11 = inMVAMETU.getSignificanceMatrix()(1,1);
+    //     // MVA MET with unity response
+    //     edm::Handle<reco::PFMETCollection> hMVAMETUProduct;
+    //     iEvent.getByLabel(fMVAMETUName,hMVAMETUProduct);
+    //     assert(hMVAMETUProduct.isValid());
+    //     const reco::PFMET &inMVAMETU = hMVAMETUProduct.product()->front();
+    //     evtInfo->mvaMETU      = inMVAMETU.pt();
+    //     evtInfo->mvaMETUphi   = inMVAMETU.phi();
+    // //    evtInfo->mvaMETUCov00 = inMVAMETU.getSignificanceMatrix()(0,0);
+    // //    evtInfo->mvaMETUCov01 = inMVAMETU.getSignificanceMatrix()(0,1);
+    // //    evtInfo->mvaMETUCov11 = inMVAMETU.getSignificanceMatrix()(1,1);
 //     
 //     // MVA MET without jet smearing (relevant only for MC)
 //     edm::Handle<reco::PFMETCollection> hMVAMET0Product;
@@ -266,12 +266,12 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
   
    
     // ============ Puppi Party ===================
-    //edm::Handle<reco::PFMETCollection> hPuppET;
-    //iEvent.getByLabel(fPuppETName,hPuppET);
-    //assert(hPuppET.isValid());
-    //const reco::PFMET &inPuppET = hPuppET.product()->front();
-    evtInfo->puppET      = 0.0;//inPuppET.pt();
-    evtInfo->puppETphi   = 0.0;//inPuppET.phi();
+    edm::Handle<reco::PFMETCollection> hPuppET;
+    iEvent.getByLabel("pfMet30",hPuppET);
+    assert(hPuppET.isValid());
+    const reco::PFMET &inPuppET = hPuppET.product()->front();
+    evtInfo->puppET      = inPuppET.pt();
+    evtInfo->puppETphi   = inPuppET.phi();
 //  evtInfo->puppETCov00 = inPuppET.getSignificanceMatrix()(0,0);
 //  evtInfo->puppETCov01 = inPuppET.getSignificanceMatrix()(0,1);
 //   evtInfo->puppETCov11 = inPuppET.getSignificanceMatrix()(1,1);
@@ -288,7 +288,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     //iEvent.getByLabel(fPFCandName,hPFCandProduct);
     //assert(hPFCandProduct.isValid());
     //const reco::PFCandidateCollection *pfCandCol = hPFCandProduct.product();
-    //computeTrackMET(pv, pfCandCol, evtInfo->trkMET, evtInfo->trkMETphi);    
+    //computeTrackMET(pv, pfCandCol, evtInfo->puppET, evtInfo->puppETphi);    
   }
   
   
@@ -330,7 +330,7 @@ void FillerEventInfo::computeTrackMET(const reco::Vertex &pv, const reco::PFCand
     if(itPF->trackRef().isNonnull() && pv.trackWeight(itPF->trackRef())>0 && fabs(itPF->vz()-pv.z())<0.2) {
       metx  -= itPF->px();
       mety  -= itPF->py();
-    }
+     }
   }
   
   TLorentzVector met;
