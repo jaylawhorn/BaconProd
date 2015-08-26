@@ -28,7 +28,6 @@ process.load("BaconProd/Ntupler/myPFMETCorrections_DATA_cff")  # PF MET correcti
 
 process.load('CommonTools.ParticleFlow.pfNoPileUpJME_cff')
 
-
 # trigger filter
 import os
 cmssw_base = os.environ['CMSSW_BASE']
@@ -46,23 +45,26 @@ process.packedPFCandidates30 = cms.EDFilter("CandPtrSelector",
 process.pfMet30                      = pfMet.clone();
 process.pfMet30.src                  = cms.InputTag('packedPFCandidates30')
 
+process.load("CondCore.DBCommon.CondDBCommon_cfi")
+from CondCore.DBCommon.CondDBSetup_cfi import *
 ## load Puppi stuff
 process.load('CommonTools/PileupAlgos/Puppi_cff') 
-#process.load('BaconProd/Ntupler/myPUPPICorrections_cff')
-#process.puppijec.connect = cms.string('sqlite:Summer15_50nsV2_MC.db')
+process.load('BaconProd/Ntupler/myPUPPICorrections_cff')
 process.pfCandNoLep = cms.EDFilter("CandPtrSelector", src = cms.InputTag("packedPFCandidates30"), cut = cms.string("abs(pdgId) != 13 && abs(pdgId) != 11 && abs(pdgId) != 15"))
+process.pfCandLep = cms.EDFilter("CandPtrSelector", src = cms.InputTag("packedPFCandidates30"), cut = cms.string("abs(pdgId) == 13 || abs(pdgId) == 11 || abs(pdgId) == 15"))
 process.puppinolep = process.puppi.clone()
 process.puppinolep.candName = 'pfCandNoLep'
+process.puppimetinput = cms.EDProducer("CandViewMerger",
+                                       src = cms.VInputTag( "pfCandLep","puppinolep")
+                                       )
 # Include the stuff for Puppi MET
 process.pfMetPuppi = pfMet.clone();
-process.pfMetPuppi.src = cms.InputTag('puppinolep')
+process.pfMetPuppi.src = cms.InputTag('puppimetinput')
 process.pfMetPuppi.calculateSignificance = False
-process.puppi30              = cms.EDFilter("CandPtrSelector",
-                                            src = cms.InputTag("puppi"),
-                                            cut = cms.string("abs(eta) < 3.0"))
-process.AK4PFJetsPuppi30             = process.ak4PFJets.clone(src = cms.InputTag("puppi30"))
-process.pfJetMETcorrPuppi30          = process.pfJetMETcorrPuppi.clone(src = 'AK4PFJetsPuppi30')
-process.pfType1PuppiCorrectedMet30   = process.pfType1PuppiCorrectedMet.clone(src='pfMetPuppi30')
+process.puppi30 = process.puppi.clone()
+process.puppi30.candName = 'packedPFCandidates30'
+process.ak4PFJetsPuppi             = process.ak4PFJets.clone(src = cms.InputTag("puppi30"))
+
 
 hlt_file = open(cmssw_base + "/src/" + hlt_filename, "r")
 for line in hlt_file.readlines():
@@ -102,7 +104,8 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     #edmPFMETCorrName     = cms.untracked.string('pfType1CorrectedMet'),
     edmPFMETCorrName     = cms.untracked.string('pfMetT1'),
     edmMVAMETName        = cms.untracked.string('pfMVAMEt30'),
-    edmPuppETName        = cms.untracked.string('pfMetPuppi'),
+    edmPuppETName        = cms.untracked.string('pfType1PuppiCorrectedMet'),
+    #edmPuppETName        = cms.untracked.string('pfMetPuppi'),
     edmTrackMET          = cms.untracked.string('pfChMet'),
     edmRhoForIsoName     = cms.untracked.string('fixedGridRhoFastjetAll'),
     edmRhoForJetEnergy   = cms.untracked.string('fixedGridRhoFastjetAll'),
@@ -180,18 +183,19 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     #    doGenJet             = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
     #    
     #    coneSizes = cms.untracked.vdouble(0.4),#,0.8,1.2),
-    postFix   = cms.untracked.vstring("CHS"),
+    #postFix   = cms.untracked.vstring("Puppi"),
     #    
     edmPVName = cms.untracked.string('offlinePrimaryVertices'),
     #    
     # ORDERED lists of jet energy correction input files
-    jecFiles = ( cms.untracked.vstring('BaconProd/Utils/data/Summer15_50nsV2_MC_L1FastJet_AK4PFchs.txt',
-                                       'BaconProd/Utils/data/Summer15_50nsV2_MC_L2Relative_AK4PFchs.txt',
-                                       'BaconProd/Utils/data/Summer15_50nsV2_MC_L3Absolute_AK4PFchs.txt')
-                     if is_data_flag else 
-                 cms.untracked.vstring('BaconProd/Utils/data/PHYS14_V1_MC_L1FastJet_AK4PF.txt',
-                                       'BaconProd/Utils/data/PHYS14_V1_MC_L2Relative_AK4PF.txt',
-                                       'BaconProd/Utils/data/PHYS14_V1_MC_L3Absolute_AK4PF.txt')
+    jecFiles = ( cms.untracked.vstring('BaconProd/Utils/data/Summer15_50nsV4_DATA_L1FastJet_AK4PFchs.txt',
+                                       'BaconProd/Utils/data/Summer15_50nsV4_DATA_L2Relative_AK4PFchs.txt',
+                                       'BaconProd/Utils/data/Summer15_50nsV4_DATA_L3Absolute_AK4PFchs.txt',
+                                       'BaconProd/Utils/data/Summer15_50nsV4_DATA_L2L3Residual_AK4PFchs.txt')
+                 if is_data_flag else 
+                 cms.untracked.vstring('BaconProd/Utils/data/Summer15_50nsV4_MC_L1FastJet_AK4PFPuppi.txt',
+                                       'BaconProd/Utils/data/Summer15_50nsV4_MC_L2Relative_AK4PFPuppi.txt',
+                                       'BaconProd/Utils/data/Summer15_50nsV4_MC_L3Absolute_AK4PFPuppi.txt')
                  ),
     jecUncFiles = ( cms.untracked.vstring('dummy.txt')
                     if is_data_flag else
@@ -231,15 +235,15 @@ process.baconSequence = cms.Sequence(#process.PFBRECO*
   process.pfMet30*
   process.pfMVAMEt30Sequence* #MVA MET
   process.producePFMETCorrections*
-  process.puppi* #  puppi
+  process.puppi30* #  puppi
   process.pfCandNoLep*
+  process.pfCandLep*
   process.puppinolep*
+  process.puppimetinput*
   process.pfMetPuppi* #  Puppi Met
-  #process.ak4PuppiL1FastL2L3ResidualChain*
-  #process.pfJetMETcorrPuppi30*
-  #process.pfType1PuppiCorrectedMet30*
-  #process.AK4jetsequencePuppiData      *
-  #process.producePFMETCorrectionsPuppi *
+  process.ak4PFJetsPuppi* 
+  process.ak4PuppiL1FastL2L3ResidualChain*
+  process.producePFMETCorrectionsPuppiData *
   #process.recojetsequence*
   #process.genjetsequence*
   #process.AK5jetsequenceCHS*

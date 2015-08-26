@@ -31,10 +31,10 @@ producePFMETCorrections = cms.Sequence(
     * corrPfMetType1
     * pfMetT1
 )
-#--------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 #Puppi
 pfJetMETcorrPuppi = corrPfMetType1.clone(
-    src = 'AK4PFJetsPuppi',
+    src = 'ak4PFJetsPuppi',
     jetCorrLabel = 'ak4PuppiL1FastL2L3Corrector',
     offsetCorrLabel = 'ak4PuppiL1FastjetCorrector',
     type1JetPtThreshold = cms.double(20)
@@ -42,14 +42,12 @@ pfJetMETcorrPuppi = corrPfMetType1.clone(
 
 pfType1PuppiCorrectedMet = pfMetT1.clone(
     src = cms.InputTag('pfMetPuppi'),
-    srcCorrections = cms.VInputTag(
-        cms.InputTag('pfJetMETcorrPuppi30', 'type1')
+     srcCorrections = cms.VInputTag(
+        cms.InputTag('pfJetMETcorrPuppi', 'type1')
         ),
     )
 
-#--------------------------------------------------------------------------------
-# define sequence to run all modules
-producePFMETCorrectionsPuppiMC = cms.Sequence(
-    pfJetMETcorrPuppi  +
-    pfType1PuppiCorrectedMet
+producePFMETCorrectionsPuppi = cms.Sequence(
+    pfJetMETcorrPuppi 
+    *pfType1PuppiCorrectedMet
 )
