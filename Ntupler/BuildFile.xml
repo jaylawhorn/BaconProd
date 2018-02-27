@@ -1,0 +1,13 @@
+<use name="BaconAna/DataFormats"/>
+<use name="BaconProd/Utils"/>
+<use name="TrackingTools/IPTools"/>
+<use name="FWCore/Framework"/>
+<use name="CondFormats/JetMETObjects"/>
+<use name="DataFormats/ParticleFlowCandidate"/>
+<use name="DataFormats/MuonReco"/>
+<use name="DataFormats/JetReco"/>
+<use name="DataFormats/HepMCCandidate"/>
+<flags CXXFLAGS="-g -Wall"/>
+<export>
+  <lib name="1"/>
+</export>
