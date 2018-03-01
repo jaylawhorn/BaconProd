@@ -23,6 +23,7 @@ FillerPF::FillerPF(const edm::ParameterSet &iConfig,edm::ConsumesCollector && iC
   fAddDepthTime(iConfig.getUntrackedParameter<bool>("doAddDepthTime",false))
 {
   fTokPFName   = iC.consumes<reco::PFCandidateCollection>(fPFName);
+  fTokPackCandName = iC.consumes<pat::PackedCandidateCollection>(fPFName);
   fTokPVName   = iC.consumes<reco::VertexCollection>     (fPVName);
   if(fAddDepthTime) { 
     std::string lTokPFRecHitECAL = "particleFlowRecHitECAL";
@@ -91,7 +92,6 @@ void FillerPF::fill(TClonesArray *array,TClonesArray *iVtxCol,
   assert(hPFRecHitHFHAD.isValid());
   const reco::PFRecHitCollection *pfRecHitHFHAD = hPFRecHitHFHAD.product();
   */
-
 
   //for(unsigned int i0 = 0; i0 < pfRecHitHFEM ->size(); i0++) pfRecHitAll.push_back((*pfRecHitHFEM) [i0]);
   //for(unsigned int i0 = 0; i0 < pfRecHitHFHAD->size(); i0++) pfRecHitAll.push_back((*pfRecHitHFHAD)[i0]);
@@ -167,6 +167,63 @@ void FillerPF::fill(TClonesArray *array,TClonesArray *iVtxCol,
     pPF->vtxId = lId;
   } 
 }
+
+void FillerPF::fillMiniAOD(TClonesArray *array,TClonesArray *iVtxCol,
+			   const edm::Event &iEvent) 
+     
+{
+  assert(array);
+  // Get PF collection
+  edm::Handle<pat::PackedCandidateCollection> hPFProduct;
+  iEvent.getByToken(fTokPackCandName,hPFProduct);
+  assert(hPFProduct.isValid());
+  const pat::PackedCandidateCollection *PFCol = hPFProduct.product();
+
+  TClonesArray &rArray = *array;
+  int pId = 0; 
+  for(pat::PackedCandidateCollection::const_iterator itPF = PFCol->begin(); itPF!=PFCol->end(); itPF++) {
+    if(itPF->pt() < 0.1) continue;
+    pId++;
+    // construct object and place in array
+    assert(rArray.GetEntries() < rArray.GetSize());
+    const int index = rArray.GetEntries();
+    new(rArray[index]) baconhep::TPFPart();
+    baconhep::TPFPart *pPF = (baconhep::TPFPart*)rArray[index];
+
+
+    //
+    // Kinematics
+    //==============================    
+    pPF->pt      = itPF->pt();
+    pPF->eta     = itPF->eta();
+    pPF->phi     = itPF->phi();
+    pPF->m       = itPF->mass();
+    pPF->e       = itPF->energy();
+    pPF->q       = itPF->charge();
+    pPF->pfType  = itPF->pdgId();
+    pPF->vtxChi2 = itPF->vertexChi2();
+    pPF->dz      = itPF->dz();
+    //pPF->d0      = itPF->dxy();
+    //pPF->d0Err   = itPF->dxyError();
+    //pPF->pup     = itPF->puppiWeight();
+    if(itPF->charge() == 0) continue;
+
+    const reco::Track & pseudoTrack =  itPF->pseudoTrack();
+    pPF->trkChi2 = pseudoTrack.normalizedChi2();
+
+    //reco::Track::CovarianceMatrix myCov = pseudoTrack.covariance ();
+    //pPF->dptdpt    = catchInfsAndBound(myCov[0][0],0,-1,1);
+    //pPF->detadeta  = catchInfsAndBound(myCov[1][1],0,-1,0.01);
+    //pPF->dphidphi  = catchInfsAndBound(myCov[2][2],0,-1,0.1);
+    //pPF->dxydxy    = catchInfsAndBound(myCov[3][3],7.,-1,7); 
+    //pPF->dzdz      = catchInfsAndBound(myCov[4][4],6.5,-1,6.5); 
+    //pPF->dxydz     = catchInfsAndBound(myCov[3][4],6.,-6,6); 
+    //pPF->dphidxy   = catchInfs(myCov[2][3],-0.03); 
+    //pPF->dlambdadz = catchInfs(myCov[1][4],-0.03); 
+  } 
+}
+
+
 float FillerPF::depthDeltaR(const reco::PFCandidate *iPF,const reco::PFRecHitCollection &iPFCol,double iDR) { 
    //Get Calo Depth of PF Clusters in a cylinder using deltar R
   float lEta     = iPF->positionAtECALEntrance().eta();
@@ -254,4 +311,21 @@ float FillerPF::time(const reco::PFCandidate *iPF) {
     }
   }
   return lMaxTime;
+}
+
+const float& FillerPF::catchInfs(const float& in,const float& replace_value){
+  if(in==in){
+    if(std::isinf(in))
+      return replace_value;
+    else if(in < -1e32 || in > 1e32)
+      return replace_value;
+    return in;
+  }
+  return replace_value;
+}
+float FillerPF::catchInfsAndBound(const float& in,const float& replace_value, const float& lowerbound, const float& upperbound){
+  float withoutinfs=catchInfs(in,replace_value);
+  if(withoutinfs<lowerbound) return lowerbound;
+  if(withoutinfs>upperbound) return upperbound;
+  return withoutinfs;
 }

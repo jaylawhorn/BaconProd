@@ -21,15 +21,18 @@
 using namespace baconhep;
 
 //--------------------------------------------------------------------------------------------------
-FillerMuon::FillerMuon(const edm::ParameterSet &iConfig,edm::ConsumesCollector && iC):
+FillerMuon::FillerMuon(const edm::ParameterSet &iConfig,const bool useAOD, edm::ConsumesCollector && iC):
   fMinPt     (iConfig.getUntrackedParameter<double>("minPt",0)),
   fMuonName  (iConfig.getUntrackedParameter<std::string>("edmName","muons")),
   fPFCandName(iConfig.getUntrackedParameter<std::string>("edmPFCandName","particleFlow")),
   fTrackName (iConfig.getUntrackedParameter<std::string>("edmTrackName","generalTracks")),
   fSaveTracks(iConfig.getUntrackedParameter<bool>("doSaveTracks",false)),
-  fTrackMinPt(iConfig.getUntrackedParameter<double>("minTrackPt",20))
+  fTrackMinPt(iConfig.getUntrackedParameter<double>("minTrackPt",20)),
+  fUseAOD    (useAOD)
 {
-  fMuonName_token = iC.consumes<reco::MuonCollection>(fMuonName);
+  if (fUseAOD) fMuonName_token = iC.consumes<reco::MuonCollection>(fMuonName);
+  if (!fUseAOD) fMuonPATName_token = iC.consumes<pat::MuonCollection>(fMuonName);
+
   fPFCandName_token = iC.consumes<reco::PFCandidateCollection>(fPFCandName);
   fTrackName_token = iC.consumes<reco::TrackCollection>(fTrackName);
 }
@@ -280,4 +283,237 @@ void FillerMuon::fill(TClonesArray *array,
       pMuon->hltMatchBits = 0;//TriggerTools::matchHLT(pMuon->eta, pMuon->phi, triggerRecords, triggerEvent);
     }    
   } 
+}
+
+// === filler for MINIAOD ===
+void FillerMuon::fill(TClonesArray *array,
+                      const edm::Event &iEvent, const edm::EventSetup &iSetup, const reco::Vertex &pv,
+                      const std::vector<TriggerRecord> &triggerRecords,
+                      const pat::TriggerObjectStandAloneCollection &triggerObjects)
+{
+  assert(array);
+
+  //const pat::PackedCandidateCollection *pfPuppi      = 0;
+  //const pat::PackedCandidateCollection *pfPuppiNoLep = 0;
+  //if(fUsePuppi) { 
+  //  // Get Puppi-candidates collection woof woof
+  //  edm::Handle<pat::PackedCandidateCollection> hPuppiProduct;
+  //  iEvent.getByToken(fTokPuppiPATName,hPuppiProduct);
+  //  assert(hPuppiProduct.isValid());
+  //  pfPuppi = hPuppiProduct.product();
+  //  
+  //  // Get Puppi-no lep candidates collection arf arf
+  //  edm::Handle<pat::PackedCandidateCollection> hPuppiNoLepProduct;
+  //  iEvent.getByToken(fTokPuppiNoLepPATName,hPuppiNoLepProduct);
+  //  assert(hPuppiNoLepProduct.isValid());
+  //  pfPuppiNoLep = hPuppiNoLepProduct.product();
+  //}
+  // Get muon collection
+  edm::Handle<pat::MuonCollection> hMuonProduct;
+  iEvent.getByToken(fMuonPATName_token,hMuonProduct);
+  assert(hMuonProduct.isValid());
+  const pat::MuonCollection *muonCol = hMuonProduct.product();
+
+  for(pat::MuonCollection::const_iterator itMu = muonCol->begin(); itMu!=muonCol->end(); ++itMu) {
+
+    // muon pT cut
+    if(itMu->pt() < fMinPt) continue;
+
+    // construct object and place in array
+    TClonesArray &rArray = *array;
+    assert(rArray.GetEntries() < rArray.GetSize());
+    const int index = rArray.GetEntries();
+    new(rArray[index]) baconhep::TMuon();
+    baconhep::TMuon *pMuon = (baconhep::TMuon*)rArray[index];
+
+    //
+    // Kinematics
+    //==============================
+    pMuon->pt     = itMu->muonBestTrack()->pt();
+    pMuon->eta    = itMu->muonBestTrack()->eta();
+    pMuon->phi    = itMu->muonBestTrack()->phi();
+    pMuon->ptErr  = itMu->muonBestTrack()->ptError();
+    pMuon->q      = itMu->muonBestTrack()->charge();
+    pMuon->staPt  = itMu->standAloneMuon().isNonnull() ? itMu->standAloneMuon()->pt()  : 0;
+    pMuon->staEta = itMu->standAloneMuon().isNonnull() ? itMu->standAloneMuon()->eta() : 0;
+    pMuon->staPhi = itMu->standAloneMuon().isNonnull() ? itMu->standAloneMuon()->phi() : 0;
+
+    pMuon->pfPt  = itMu->pfP4().pt();
+    pMuon->pfEta = itMu->pfP4().eta();
+    pMuon->pfPhi = itMu->pfP4().phi();
+
+    //
+    // Isolation
+    //==============================
+    pMuon->trkIso  = itMu->isolationR03().sumPt;
+    pMuon->ecalIso = itMu->isolationR03().emEt;
+    pMuon->hcalIso = itMu->isolationR03().hadEt;
+
+    pMuon->chHadIso  = itMu->pfIsolationR04().sumChargedHadronPt;
+    pMuon->gammaIso  = itMu->pfIsolationR04().sumPhotonEt;
+    pMuon->neuHadIso = itMu->pfIsolationR04().sumNeutralHadronEt;
+    pMuon->puIso = itMu->pfIsolationR04().sumPUPt;
+
+
+    //if(fUsePuppi) { 
+    //  double pEta = pMuon->pfEta;
+    //  double pPhi = pMuon->pfPhi;
+    //  if(pEta == 0) pEta = itMu->muonBestTrack()->eta();
+    //  if(pPhi == 0) pPhi = itMu->muonBestTrack()->phi();
+    //  computeIso(pEta,pPhi, 0.4, (*pfPuppi), 
+    //		 pMuon->puppiChHadIso,
+    //		 pMuon->puppiGammaIso,
+    //		 pMuon->puppiNeuHadIso);
+    //  
+    //  computeIso(pEta,pPhi, 0.4, (*pfPuppiNoLep),
+    //		 pMuon->puppiChHadIsoNoLep,
+    //		 pMuon->puppiGammaIsoNoLep,
+    //		 pMuon->puppiNeuHadIsoNoLep);
+    //}
+
+
+    //
+    // Impact Parameter
+    //==============================
+    pMuon->d0    = (-1)*(itMu->muonBestTrack()->dxy(pv.position()));  // note: d0 = -dxy
+    pMuon->dz    = itMu->muonBestTrack()->dz(pv.position());
+    pMuon->sip3d = (itMu->edB(pat::Muon::PV3D) > 0) ? itMu->dB(pat::Muon::PV3D)/itMu->edB(pat::Muon::PV3D) : -999;
+
+
+    //
+    // Identification
+    //==============================
+    pMuon->tkNchi2    = itMu->innerTrack().isNonnull()  ? itMu->innerTrack()->normalizedChi2()  : -999.;
+    pMuon->muNchi2    = itMu->globalTrack().isNonnull() ? itMu->globalTrack()->normalizedChi2() : -999.;
+    pMuon->trkKink    = itMu->combinedQuality().trkKink;
+    pMuon->glbKink    = itMu->combinedQuality().glbKink;
+    //pMuon->trkHitFrac = itMu->innerTrack().isNonnull() ? itMu->innerTrack()->validFraction() : 0;
+    //pMuon->chi2LocPos = itMu->combinedQuality().chi2LocalPosition;
+    //pMuon->segComp    = muon::segmentCompatibility(*itMu);
+    //pMuon->caloComp   = muon::caloCompatibility(*itMu);
+    pMuon->typeBits   = itMu->type();
+
+
+    pMuon->selectorBits=0;
+    if(itMu->muonID("All"))                                    pMuon->selectorBits |= baconhep::kAll;
+    if(itMu->muonID("AllGlobalMuons"))                         pMuon->selectorBits |= baconhep::kAllGlobalMuons;
+    if(itMu->muonID("AllStandAloneMuons"))                     pMuon->selectorBits |= baconhep::kAllStandAloneMuons;
+    if(itMu->muonID("AllTrackerMuons"))                        pMuon->selectorBits |= baconhep::kAllTrackerMuons;
+    if(itMu->muonID("TrackerMuonArbitrated"))                  pMuon->selectorBits |= baconhep::kTrackerMuonArbitrated;
+    if(itMu->muonID("AllArbitrated"))                          pMuon->selectorBits |= baconhep::kAllArbitrated;
+    if(itMu->muonID("GlobalMuonPromptTight"))                  pMuon->selectorBits |= baconhep::kGlobalMuonPromptTight;
+    if(itMu->muonID("TMLastStationLoose"))                     pMuon->selectorBits |= baconhep::kTMLastStationLoose;
+    if(itMu->muonID("TMLastStationTight"))                     pMuon->selectorBits |= baconhep::kTMLastStationTight;
+    if(itMu->muonID("TM2DCompatibilityLoose"))                 pMuon->selectorBits |= baconhep::kTM2DCompatibilityLoose;
+    if(itMu->muonID("TM2DCompatibilityTight"))                 pMuon->selectorBits |= baconhep::kTM2DCompatibilityTight;
+    if(itMu->muonID("TMOneStationLoose"))                      pMuon->selectorBits |= baconhep::kTMOneStationLoose;
+    if(itMu->muonID("TMOneStationTight"))                      pMuon->selectorBits |= baconhep::kTMOneStationTight;
+    if(itMu->muonID("TMLastStationOptimizedLowPtLoose"))       pMuon->selectorBits |= baconhep::kTMLastStationOptimizedLowPtLoose;
+    if(itMu->muonID("TMLastStationOptimizedLowPtTight"))       pMuon->selectorBits |= baconhep::kTMLastStationOptimizedLowPtTight;
+    if(itMu->muonID("GMTkChiCompatibility"))                   pMuon->selectorBits |= baconhep::kGMTkChiCompatibility;
+    if(itMu->muonID("GMStaChiCompatibility"))                  pMuon->selectorBits |= baconhep::kGMStaChiCompatibility;
+    if(itMu->muonID("GMTkKinkTight"))                          pMuon->selectorBits |= baconhep::kGMTkKinkTight;
+    if(itMu->muonID("TMLastStationAngLoose"))                  pMuon->selectorBits |= baconhep::kTMLastStationAngLoose;
+    if(itMu->muonID("TMLastStationAngTight"))                  pMuon->selectorBits |= baconhep::kTMLastStationAngTight;
+    if(itMu->muonID("TMOneStationAngLoose"))                   pMuon->selectorBits |= baconhep::kTMOneStationAngLoose;
+    if(itMu->muonID("TMOneStationAngTight"))                   pMuon->selectorBits |= baconhep::kTMOneStationAngTight;
+    if(itMu->muonID("TMLastStationOptimizedBarrelLowPtLoose")) pMuon->selectorBits |= baconhep::kTMLastStationOptimizedBarrelLowPtLoose;
+    if(itMu->muonID("TMLastStationOptimizedBarrelLowPtTight")) pMuon->selectorBits |= baconhep::kTMLastStationOptimizedBarrelLowPtTight;
+    if(itMu->muonID("RPCMuLoose"))                             pMuon->selectorBits |= baconhep::kRPCMuLoose;
+
+
+    pMuon->pogIDBits=0;
+    if(itMu->isLooseMuon())    pMuon->pogIDBits |= baconhep::kPOGLooseMuon;
+    //if(itMu->isMediumMuon())   pMuon->pogIDBits |= baconhep::kPOGMediumMuon;
+    if(itMu->isTightMuon(pv))  pMuon->pogIDBits |= baconhep::kPOGTightMuon;
+    if(itMu->isSoftMuon(pv))   pMuon->pogIDBits |= baconhep::kPOGSoftMuon;
+    if(itMu->isHighPtMuon(pv)) pMuon->pogIDBits |= baconhep::kPOGHighPtMuon;
+
+    pMuon->nValidHits = itMu->globalTrack().isNonnull() ? itMu->globalTrack()->hitPattern().numberOfValidMuonHits()       : 0;
+    pMuon->nTkHits    = itMu->innerTrack().isNonnull()  ? itMu->innerTrack()->hitPattern().numberOfValidTrackerHits()     : 0;
+    pMuon->nPixHits   = itMu->innerTrack().isNonnull()  ? itMu->innerTrack()->hitPattern().numberOfValidPixelHits()       : 0;
+    pMuon->nTkLayers  = itMu->innerTrack().isNonnull()  ? itMu->innerTrack()->hitPattern().trackerLayersWithMeasurement() : 0;
+    pMuon->nPixLayers = itMu->innerTrack().isNonnull()  ? itMu->innerTrack()->hitPattern().pixelLayersWithMeasurement()   : 0;
+    pMuon->nMatchStn  = itMu->numberOfMatchedStations();
+
+    // Obtain a track ID, unique per event. The track ID is the index in the general tracks collection
+    pMuon->trkID = -1;  // general tracks not in MINIAOD
+
+    //pMuon->hltMatchBits = TriggerTools::matchHLT(pMuon->eta, pMuon->phi, triggerRecords, triggerObjects);
+  }
+}
+
+void FillerMuon::computeIso(double &iEta,double &iPhi, const double extRadius,
+			    const reco::PFCandidateCollection    &puppi,
+                            float &out_chHadIso, float &out_gammaIso, float &out_neuHadIso) const
+{
+  // Muon PF isolation with delta-beta PU correction:
+  // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Muon_Isolation
+  
+  double chHadIso=0, gammaIso=0, neuHadIso=0;
+  
+  const double ptMin           = 0.1;  
+  //const double intRadiusChHad  = 0.0001;
+  //const double intRadiusGamma  = 0.01;
+  //const double intRadiusNeuHad = 0.01;
+  double intRadius = 0;
+  
+  for(unsigned int ipf=0; ipf<puppi.size(); ipf++) {
+    const reco::PFCandidate pfcand = puppi.at(ipf);    
+    bool pPass = true;
+    double dr = reco::deltaR(pfcand.eta(), pfcand.phi(), iEta, iPhi);
+    if(dr < 0.0001) pPass = false; //Use this to avoid float/double bullshit
+    if(pPass) { 
+      if     (pfcand.particleId() == reco::PFCandidate::h)     { intRadius = 0;}//intRadiusChHad; }
+      else if(pfcand.particleId() == reco::PFCandidate::gamma) { intRadius = 0;}//intRadiusGamma;  }
+      else if(pfcand.particleId() == reco::PFCandidate::h0)    { intRadius = 0;}//intRadiusNeuHad; }
+            
+      if(dr>=extRadius || dr<intRadius) continue;
+            
+      if     (pfcand.particleId() == reco::PFCandidate::h)                             { chHadIso  += pfcand.pt(); }
+      else if(pfcand.particleId() == reco::PFCandidate::gamma && pfcand.pt() > ptMin) { gammaIso  += pfcand.pt(); }
+      else if(pfcand.particleId() == reco::PFCandidate::h0    && pfcand.pt() > ptMin) { neuHadIso += pfcand.pt(); }
+    }
+  }
+  // compute PU iso
+  out_chHadIso  = chHadIso;
+  out_gammaIso  = gammaIso;
+  out_neuHadIso = neuHadIso;
+}
+
+void FillerMuon::computeIso(double &iEta,double &iPhi, const double extRadius,
+			    const pat::PackedCandidateCollection    &puppi,
+                            float &out_chHadIso, float &out_gammaIso, float &out_neuHadIso) const
+{
+  // Muon PF isolation with delta-beta PU correction:
+  // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Muon_Isolation
+  
+  double chHadIso=0, gammaIso=0, neuHadIso=0;
+  
+  const double ptMin           = 0.1;  
+  //const double intRadiusChHad  = 0.0001;
+  //const double intRadiusGamma  = 0.01;
+  //const double intRadiusNeuHad = 0.01;
+  double intRadius = 0;
+  
+  for(unsigned int ipf=0; ipf<puppi.size(); ipf++) {
+    const pat::PackedCandidate pfcand = puppi.at(ipf);    
+    bool pPass = true;
+    double dr = reco::deltaR(pfcand.eta(), pfcand.phi(), iEta, iPhi);
+    if(dr < 0.0001) pPass = false; //Use this to avoid float/double bullshit
+    if(pPass) { 
+      if     (abs(pfcand.pdgId()) == 211)     { intRadius = 0;}//intRadiusChHad; }
+      else if(abs(pfcand.pdgId()) == 22)      { intRadius = 0;}//intRadiusGamma;  }
+      else if(abs(pfcand.pdgId()) == 130)     { intRadius = 0;}//intRadiusNeuHad; }
+            
+      if(dr>=extRadius || dr<intRadius) continue;
+      if     (abs(pfcand.pdgId()) == 211)                        { chHadIso  += pfcand.pt(); }
+      else if(abs(pfcand.pdgId()) == 22  && pfcand.pt() > ptMin) { gammaIso  += pfcand.pt(); }
+      else if(abs(pfcand.pdgId()) == 130 && pfcand.pt() > ptMin) { neuHadIso += pfcand.pt(); }      
+    }
+  }
+  // compute PU iso
+  out_chHadIso  = chHadIso;
+  out_gammaIso  = gammaIso;
+  out_neuHadIso = neuHadIso;
 }

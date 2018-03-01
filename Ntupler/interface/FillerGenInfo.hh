@@ -3,14 +3,19 @@
 
 #include <string>
 #include "FWCore/Framework/interface/ConsumesCollector.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
 // forward class declarations
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-class TClonesArray;
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 
+class TClonesArray;
 
 namespace baconhep
 {
@@ -30,12 +35,16 @@ namespace baconhep
       
       // EDM object collection names
       std::string fGenEvtInfoName;
-      edm::EDGetTokenT<GenEventInfoProduct> fGenEvtInfoName_token;
       std::string fLHEEventName;
-      edm::EDGetTokenT<LHEEventProduct> fLHEEventName_token;
       std::string fGenParName;
-      edm::EDGetTokenT<reco::GenParticleCollection> fGenParName_token;
+      std::string fGenPackParName;
       bool        fFillAll;
+
+      edm::EDGetTokenT<GenEventInfoProduct> fGenEvtInfoName_token;
+      edm::EDGetTokenT<LHEEventProduct> fLHEEventName_token;
+      edm::EDGetTokenT<reco::GenParticleCollection> fGenParName_token;
+      edm::EDGetTokenT<pat::PackedGenParticleCollection> fGenPackParName_token;
+
   };
 }
 #endif

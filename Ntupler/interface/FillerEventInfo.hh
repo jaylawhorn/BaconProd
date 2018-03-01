@@ -12,6 +12,9 @@
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/METReco/interface/PFMET.h"
 #include "DataFormats/METReco/interface/PFMETCollection.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
+
 
 // forward class declarations
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -27,47 +30,65 @@ namespace trigger {
 namespace baconhep
 {
   class TEventInfo;  // foward declaration
+//  class TSusyGen;    // ditto
   class FillerEventInfo
   {
-    public:
-    FillerEventInfo(const edm::ParameterSet &iConfig,edm::ConsumesCollector && iC);
-      ~FillerEventInfo();
-      
-      void fill(TEventInfo         *evtInfo,       // output object to be filled
-                const edm::Event   &iEvent,        // EDM event info
-		const reco::Vertex &pv,            // event primary vertex
-		const bool          hasGoodPV,     // flag for if PV passing cuts is found
-		const TriggerBits   triggerBits);//,   // bits for corresponding fired triggers
-	       
-    protected:
-      void computeTrackMET(const reco::Vertex &pv, 
-                           const reco::PFCandidateCollection *pfCandCol,
-                           float &out_met, float &out_metphi);
+  public:
+    FillerEventInfo(const edm::ParameterSet &iConfig,const bool useAOD, edm::ConsumesCollector && iC);
+    ~FillerEventInfo();
     
+    void fill(TEventInfo         *evtInfo,       // output object to be filled
+	      const edm::Event   &iEvent,        // EDM event info
+	      const reco::Vertex &pv,            // event primary vertex
+	      const bool          hasGoodPV,     // flag for if PV passing cuts is found
+	      const TriggerBits   triggerBits);//,   // bits for corresponding fired triggers
     
-      // EDM object collection names
-      std::string fPFCandName;
-      std::string fPUInfoName;
-      edm::EDGetTokenT<std::vector<PileupSummaryInfo> > fPUInfoName_token;
-      std::string fBSName;
-      edm::EDGetTokenT<reco::BeamSpot> fBSName_token;
-      std::string fPFMETName;
-      edm::EDGetTokenT<reco::PFMETCollection> fPFMETName_token;
-      std::string fPFMETCName;
-      edm::EDGetTokenT<reco::PFMETCollection> fPFMETCName_token;
-      std::string fPuppETName;
-      edm::EDGetTokenT<reco::PFMETCollection> fPuppETName_token;
-      std::string fMVAMETName;
-      std::string fCHMETName;
-      edm::EDGetTokenT<reco::PFMETCollection> fCHMETName_token;
-//      std::string fMVAMET0Name;
-      std::string fRhoIsoName;
-      edm::EDGetTokenT<double> rhoIsoTag_token;
-      std::string fRhoJetName;
-      edm::EDGetTokenT<double> rhoJetTag_token;
-      bool        fFillMET;
-      bool        fFillMETFilters;
-//      bool        fAddSusyGen;
+  protected:
+    void computeTrackMET(const reco::Vertex &pv, 
+			 const reco::PFCandidateCollection *pfCandCol,
+			 float &out_met, float &out_metphi);
+
+    void computeTrackMET(const pat::PackedCandidateCollection *pfCandCol,
+			 float &out_met, float &out_metphi);
+    
+    // EDM object collection names
+    std::string fPFCandName;
+    std::string fPUInfoName;
+    std::string fPVName;
+    std::string fBSName;
+
+    std::string fMETName;
+    std::string fPFMETName;
+    std::string fPFMETCName;
+    std::string fPuppETName;
+    std::string fPuppETCName;
+
+    std::string fRhoIsoName;
+    std::string fRhoJetName;
+    
+    bool        fFillMET;
+    bool        fFillMETFilters;
+    bool        fUseAOD;
+
+    edm::EDGetTokenT<reco::PFMETCollection> fPFMETName_token;
+    edm::EDGetTokenT<reco::PFMETCollection> fPFMETCName_token;
+    edm::EDGetTokenT<reco::PFMETCollection> fPuppETName_token;
+    edm::EDGetTokenT<reco::PFMETCollection> fPuppETCName_token;
+
+    edm::EDGetTokenT<pat::METCollection> fPFMETPATName_token;
+    //edm::EDGetTokenT<pat::METCollection> fPFMETCPATName_token;
+    edm::EDGetTokenT<pat::METCollection> fPuppETPATName_token;
+    //edm::EDGetTokenT<pat::METCollection> fPuppETCPATName_token;
+
+    edm::EDGetTokenT<std::vector<PileupSummaryInfo> > fPUInfoName_token;
+    edm::EDGetTokenT<reco::BeamSpot> fBSName_token;
+
+    edm::EDGetTokenT<reco::PFCandidateCollection> fPFCandName_token;
+    edm::EDGetTokenT<pat::PackedCandidateCollection> fPackCandName_token;
+
+    edm::EDGetTokenT<double> rhoIsoTag_token;
+    edm::EDGetTokenT<double> rhoJetTag_token;
+    
   };
 }
 #endif

@@ -47,8 +47,9 @@
 //--------------------------------------------------------------------------------------------------
 NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fSkipOnHLTFail     (iConfig.getUntrackedParameter<bool>("skipOnHLTFail",false)),
+  fUseAOD            (iConfig.getUntrackedParameter<bool>("useAOD",false)),
   fHLTTag            ("TriggerResults","","HLT"),
-  fHLTObjTag         ("hltTriggerSummaryAOD","","HLT"),
+  fHLTObjTag         ("slimmedPatTrigger","","RECO"),
   fHLTFile           (iConfig.getUntrackedParameter<std::string>("TriggerFile","HLT")),
   fPVName            (iConfig.getUntrackedParameter<std::string>("edmPVName","offlinePrimaryVertices")),
   fPFCandName        (iConfig.getUntrackedParameter<std::string>("edmPFCandName","particleFlow")),
@@ -81,8 +82,9 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fPVArr             (0),
   fPFParArr          (0)
 {
-  fHLTTag_token = consumes<edm::TriggerResults>(fHLTTag);
-  fHLTObjTag_token = consumes<trigger::TriggerEvent>(fHLTObjTag);
+  fHLTTag_token = consumes<edm::TriggerResults>(edm::InputTag(fHLTTag));
+  fHLTObjTag_token = consumes<trigger::TriggerEvent>(edm::InputTag(fHLTObjTag));
+  fTrgObj_token = consumes<pat::TriggerObjectStandAloneCollection>(edm::InputTag(fHLTObjTag)); 
   fPFCandName_token = consumes<reco::PFCandidateCollection>(fPFCandName);
   fPVName_token = consumes<reco::VertexCollection>(fPVName);
   // Don't write TObject part of the objects
@@ -101,10 +103,10 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   if(iConfig.existsAs<edm::ParameterSet>("Info",false)) {
     edm::ParameterSet cfg(iConfig.getUntrackedParameter<edm::ParameterSet>("Info"));
     fIsActiveEvtInfo = cfg.getUntrackedParameter<bool>("isActive");
-
+    
     if(fIsActiveEvtInfo) {
       fEvtInfo       = new baconhep::TEventInfo();            assert(fEvtInfo);
-      fFillerEvtInfo = new baconhep::FillerEventInfo(cfg,consumesCollector());    assert(fFillerEvtInfo);
+      fFillerEvtInfo = new baconhep::FillerEventInfo(cfg, fUseAOD, consumesCollector());    assert(fFillerEvtInfo);
     }
   }
 
@@ -126,7 +128,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
     // because FillerVertex::fill(...) is used to find the event primary vertex
     // (not elegant, but I suppose a dedicated PV finding function can be implemented somewhere...)
     fPVArr    = new TClonesArray("baconhep::TVertex"); assert(fPVArr);
-    fFillerPV = new baconhep::FillerVertex(cfg);       assert(fFillerPV);
+    fFillerPV = new baconhep::FillerVertex(cfg,fUseAOD,consumesCollector());       assert(fFillerPV);
   }
     
   if(iConfig.existsAs<edm::ParameterSet>("Electron",false)) {
@@ -134,7 +136,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
     fIsActiveEle = cfg.getUntrackedParameter<bool>("isActive");
     if(fIsActiveEle) {
       fEleArr    = new TClonesArray("baconhep::TElectron"); assert(fEleArr);
-      fFillerEle = new baconhep::FillerElectron(cfg,consumesCollector());       assert(fFillerEle);
+      fFillerEle = new baconhep::FillerElectron(cfg,fUseAOD,consumesCollector());       assert(fFillerEle);
     }
   }  
 
@@ -143,7 +145,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
     fIsActiveMuon = cfg.getUntrackedParameter<bool>("isActive");
     if(fIsActiveMuon) {
       fMuonArr    = new TClonesArray("baconhep::TMuon"); assert(fMuonArr);
-      fFillerMuon = new baconhep::FillerMuon(cfg,consumesCollector());       assert(fFillerMuon);
+      fFillerMuon = new baconhep::FillerMuon(cfg,fUseAOD,consumesCollector());       assert(fFillerMuon);
     }
   }  
 
@@ -284,8 +286,7 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       triggerBits [fTrigger->fRecords[irec].baconTrigBit] = 1;
     }
   }
-  if(fSkipOnHLTFail && triggerBits == 0) return;  
-
+  if(fSkipOnHLTFail && triggerBits == 0) return;
 
   if(fIsActiveGenInfo) {
     fGenParArr->Clear();
@@ -304,25 +305,45 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   }
   
   edm::Handle<trigger::TriggerEvent> hTrgEvt;
-  iEvent.getByToken(fHLTObjTag_token,hTrgEvt);
+  edm::Handle<pat::TriggerObjectStandAloneCollection> hTrgObjs;
+
+  //const trigger::TriggerEvent*                  hTrgEvtDummy  = 0; 
+  //const pat::TriggerObjectStandAloneCollection* hTrgObjsDummy = 0; 
+
+  iEvent.getByToken(fHLTObjTag_token,hTrgEvt);  
+  iEvent.getByToken(fTrgObj_token,hTrgObjs);
+
+//if(!fUseAOD) {
+//  for (uint iobj =0; iobj< (*hTrgObjs).size(); iobj++) {
+//    hTrgObjs->at(iobj).unpackFilterLabels(iEvent, *hTrgRes);
+//  }
+//
+//  //(*hTrgObjs).unpackFilterLabels(iEvent);
+//}
+  //else {hTrgObjsDummy = &(*hTrgObjs); }
   
   if(fIsActiveEle) {
     fEleArr->Clear();
-    fFillerEle->fill(fEleArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt);
+    if (fUseAOD) { fFillerEle->fill(fEleArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt); }
+    else         { fFillerEle->fill(fEleArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }
   }
 
   if(fIsActiveMuon) {
     fMuonArr->Clear();  
-    fFillerMuon->fill(fMuonArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt);
+    if (fUseAOD) { fFillerMuon->fill(fMuonArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt); }
+    else         { fFillerMuon->fill(fMuonArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }
+    
   }
 
   if(fIsActivePhoton) {
     fPhotonArr->Clear();  
-    fFillerPhoton->fill(fPhotonArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt);
+    if (fUseAOD) { fFillerPhoton->fill(fPhotonArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt); }
+    //else         { fFillerPhoton->fill(fPhotonArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }
   }
   if(fIsActivePF) { 
     fPFParArr->Clear();
-    fFillerPF->fill(fPFParArr,fPVArr,iEvent); 
+    if (fUseAOD) { fFillerPF->fill(fPFParArr,fPVArr,iEvent); }
+    else         { fFillerPF->fillMiniAOD(fPFParArr, fPVArr, iEvent); }
   }
   if(fIsActiveJet) {
     fJetArr[0]->Clear();
@@ -360,7 +381,7 @@ void NtuplerMod::initHLT(const edm::TriggerResults& result, const edm::TriggerNa
 }
 
 //--------------------------------------------------------------------------------------------------
-void NtuplerMod::separatePileUp(const edm::Event &iEvent, const reco::Vertex &pv)
+/*void NtuplerMod::separatePileUp(const edm::Event &iEvent, const reco::Vertex &pv)
 {
   // recipe from Matthew Chan
 
@@ -417,7 +438,7 @@ void NtuplerMod::separatePileUp(const edm::Event &iEvent, const reco::Vertex &pv
     }
   }
 }
-
+*/
 //--------------------------------------------------------------------------------------------------
 void NtuplerMod::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation

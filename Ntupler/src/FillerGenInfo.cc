@@ -16,11 +16,13 @@ FillerGenInfo::FillerGenInfo(const edm::ParameterSet &iConfig,edm::ConsumesColle
   fGenEvtInfoName(iConfig.getUntrackedParameter<std::string>("edmGenEventInfoName","generator")),
   fLHEEventName  (iConfig.getUntrackedParameter<std::string>("edLHEEventName","externalLHEProducer")),
   fGenParName    (iConfig.getUntrackedParameter<std::string>("edmGenParticlesName","genParticles")),
+  fGenPackParName    (iConfig.getUntrackedParameter<std::string>("edmGenPackParticlesName","packedGenParticles")),
   fFillAll       (iConfig.getUntrackedParameter<bool>("fillAllGen",true))
 {
   fGenEvtInfoName_token = iC.consumes<GenEventInfoProduct>(fGenEvtInfoName);
   fLHEEventName_token = iC.consumes<LHEEventProduct>(fLHEEventName);
   fGenParName_token = iC.consumes<reco::GenParticleCollection>(fGenParName);
+  fGenPackParName_token = iC.consumes<pat::PackedGenParticleCollection>(fGenParName);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -36,8 +38,17 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,const ed
   edm::Handle<GenEventInfoProduct> hGenEvtInfoProduct;
   iEvent.getByToken(fGenEvtInfoName_token,hGenEvtInfoProduct);
   assert(hGenEvtInfoProduct.isValid());
+
+  const gen::PdfInfo *pdfInfo = (hGenEvtInfoProduct->hasPDF()) ? hGenEvtInfoProduct->pdf() : 0;
+  genEvtInfo->id_1     = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->id.first  : 0;
+  genEvtInfo->id_2     = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->id.second : 0;
+  genEvtInfo->x_1      = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->x.first   : 0;
+  genEvtInfo->x_2      = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->x.second  : 0;
+  genEvtInfo->scalePDF = hGenEvtInfoProduct->qScale();
+  //genEvtInfo->xs       = iXS;
+  genEvtInfo->weight = hGenEvtInfoProduct->weight();
   
-  edm::Handle<LHEEventProduct> hLHEEventProduct;
+  /*  edm::Handle<LHEEventProduct> hLHEEventProduct;
   iEvent.getByToken(fLHEEventName_token,hLHEEventProduct);
   assert(hLHEEventProduct.isValid());
   genEvtInfo->lheweight.clear();
@@ -115,4 +126,5 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,const ed
     edm::Ptr<reco::GenParticle> thePtr(hGenParProduct, itGenP - genParticles.begin());
     lMothers.push_back(thePtr);
   }
+  */
 }

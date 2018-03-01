@@ -393,7 +393,7 @@ void FillerJet::fill(TClonesArray *array, //TClonesArray *iExtraArray,TClonesArr
       pJet->genm                   = matchGenJet->mass();
     }
 */
-    pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, triggerEvent);
+    //pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, triggerEvent);
 /*
     ////Add Extras
     baconhep::TAddJet *pAddJet = 0; 

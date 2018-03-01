@@ -1,5 +1,6 @@
 <use name="RecoEcal/EgammaCoreTools"/>
 <use name="RecoEgamma/EgammaTools"/>
+<use name="DataFormats/PatCandidates"/>
 <use name="root"/>
 <use name="roottmva"/>
 <!--use name="rootcintex"/-->
