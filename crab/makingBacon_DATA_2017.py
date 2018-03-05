@@ -45,7 +45,8 @@ for line in hlt_file.readlines():
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 process.source = cms.Source("PoolSource",
                             #fileNames = cms.untracked.vstring('file:/eos/cms/store/user/arapyan/AOD/SingleMuon/Samples/180222_135310/0000/Output_93.root')
-                            fileNames = cms.untracked.vstring('file:/eos/cms/store/data/Run2017F/SingleMuon/MINIAOD/17Nov2017-v1/70001/FCB5C183-4CEB-E711-942B-0242AC130002.root')
+                            #fileNames = cms.untracked.vstring('file:/eos/cms/store/data/Run2017F/SingleMuon/MINIAOD/17Nov2017-v1/70001/FCB5C183-4CEB-E711-942B-0242AC130002.root')
+                            fileNames = cms.untracked.vstring('file:/eos/cms/store/data/Run2017F/SingleElectron/MINIAOD/17Nov2017-v1/70000/D6AB6AC0-CADF-E711-85BC-0025905B85C6.root')
                             )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -57,7 +58,7 @@ process.options = cms.untracked.PSet(
   )
 
 is_data_flag = True 
-do_hlt_filter = False
+do_hlt_filter = True
 use_AOD = False
 
 process.ntupler = cms.EDAnalyzer('NtuplerMod',

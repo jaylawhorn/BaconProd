@@ -258,6 +258,8 @@ void NtuplerMod::setTriggers()
 {
   std::string cmssw_base_src = getenv("CMSSW_BASE"); cmssw_base_src+="/src/";
   fTrigger = new baconhep::TTrigger(cmssw_base_src + fHLTFile);
+
+  std::cout << fTrigger->fRecords.size() << std::endl;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -266,7 +268,6 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   fTotalEvents->Fill(1);
   
   edm::Handle<edm::TriggerResults> hTrgRes;
-  //iEvent.getByLabel(fHLTTag,hTrgRes);
   iEvent.getByToken(fHLTTag_token,hTrgRes);
   assert(hTrgRes.isValid());  
   const edm::TriggerNames &triggerNames = iEvent.triggerNames(*hTrgRes);
@@ -306,33 +307,28 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   
   edm::Handle<trigger::TriggerEvent> hTrgEvt;
   edm::Handle<pat::TriggerObjectStandAloneCollection> hTrgObjs;
+  //edm::Handle  hTrgObjs;
 
   //const trigger::TriggerEvent*                  hTrgEvtDummy  = 0; 
-  //const pat::TriggerObjectStandAloneCollection* hTrgObjsDummy = 0; 
+  pat::TriggerObjectStandAloneCollection* hTrgObjsDummy = 0; 
 
   iEvent.getByToken(fHLTObjTag_token,hTrgEvt);  
   iEvent.getByToken(fTrgObj_token,hTrgObjs);
 
-//if(!fUseAOD) {
-//  for (uint iobj =0; iobj< (*hTrgObjs).size(); iobj++) {
-//    hTrgObjs->at(iobj).unpackFilterLabels(iEvent, *hTrgRes);
-//  }
-//
-//  //(*hTrgObjs).unpackFilterLabels(iEvent);
-//}
-  //else {hTrgObjsDummy = &(*hTrgObjs); }
-  
+  if (!fUseAOD) {
+    hTrgObjsDummy = new pat::TriggerObjectStandAloneCollection(*hTrgObjs);
+  }
+
   if(fIsActiveEle) {
     fEleArr->Clear();
     if (fUseAOD) { fFillerEle->fill(fEleArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt); }
-    else         { fFillerEle->fill(fEleArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }
+    else         { fFillerEle->fill(fEleArr, iEvent, iSetup, *pv, triggerNames, *hTrgRes, fTrigger->fRecords, *hTrgObjsDummy); }
   }
 
   if(fIsActiveMuon) {
     fMuonArr->Clear();  
     if (fUseAOD) { fFillerMuon->fill(fMuonArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt); }
-    else         { fFillerMuon->fill(fMuonArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }
-    
+    else         { fFillerMuon->fill(fMuonArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }    
   }
 
   if(fIsActivePhoton) {

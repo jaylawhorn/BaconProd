@@ -39,26 +39,69 @@ TriggerObjects TriggerTools::matchHLT(const double eta, const double phi,
 }
 
 TriggerObjects TriggerTools::matchHLT(const double eta, const double phi,  
+				      const edm::Event &iEvent,
                                       const std::vector<TriggerRecord> &triggerRecords,
-                                      const pat::TriggerObjectStandAloneCollection &triggerObjects)
+				      const edm::TriggerNames &triggerNames,
+				      const edm::TriggerResults &triggerResults,
+                                      pat::TriggerObjectStandAloneCollection &triggerObjects)
 {
-  const double dRMax = 0.2;
 
-  TriggerObjects matchBits;
-  for(unsigned int irec=0; irec<triggerRecords.size(); irec++) {     
-    for(unsigned int iobj=0; iobj<triggerRecords[irec].objectMap.size(); iobj++) {
-      const std::string   filterName = triggerRecords[irec].objectMap[iobj].first;
-      const unsigned int  filterBit  = triggerRecords[irec].objectMap[iobj].second;
-      //std::cout << "hai" << std::endl;
-      for(pat::TriggerObjectStandAlone tobj : triggerObjects) {
-        if(tobj.hasFilterLabel(filterName)) {
-          if(reco::deltaR(eta,phi,tobj.eta(),tobj.phi()) < dRMax) {
-            matchBits[filterBit] = 1; 
-          }
-        }
+  const double dRMax = 0.2;
+  TriggerObjects matchBits;  
+
+  for (unsigned int irec=0; irec<triggerRecords.size(); irec++) {
+    for (unsigned int iobj=0; iobj<triggerRecords[irec].objectMap.size(); iobj++) {
+      std::vector<std::string> dumb; dumb.push_back(triggerRecords[irec].objectMap[iobj].first);
+      const unsigned int filterBit = triggerRecords[irec].objectMap[iobj].second;
+
+      for (pat::TriggerObjectStandAlone tobj : triggerObjects) {
+	tobj.unpackPathNames(triggerNames);
+	if (tobj.pathNames().size()==0) continue;
+	tobj.unpackFilterLabels(iEvent, triggerResults);
+	//std::cout << tobj.filterLabels().size() << std::endl;
+	if (tobj.hasFilterLabel(dumb.at(0))) {
+	  if (reco::deltaR(eta, phi, tobj.eta(), tobj.phi())<dRMax) {
+	    matchBits[filterBit] = 1;
+	  }
+	}
+	
       }
     }
   }
+
+  
+//  if (triggerObjects.at(0).pathNames().size()==0) return matchBits;
+//  triggerObjects.at(0).unpackPathNames(triggerNames);
+//  std::cout << "----" << std::endl;
+//  std::cout << triggerObjects.at(0).pathNames().size() << std::endl;
+//
+//  for (pat::TriggerObjectStandAlone tobj : triggerObjects) {
+//    std::cout << "QQ" << std::endl;
+//    tobj.unpackFilterLabels(dumb);
+//    std::cout << "QQQ" << std::endl;
+//    std::cout << tobj.filterLabels().size() << std::endl;
+//  }
+
+  //for(unsigned int irec=0; irec<triggerRecords.size(); irec++) {     
+  //  for(unsigned int iobj=0; iobj<triggerRecords[irec].objectMap.size(); iobj++) {
+  //    const std::string   filterName = triggerRecords[irec].objectMap[iobj].first;
+  //    const unsigned int  filterBit  = triggerRecords[irec].objectMap[iobj].second;
+  //    std::vector<std::string> dumb;
+  //    dumb.push_back(filterName);
+  //    dumb.push_back("");
+  //    std::cout << "hai" << std::endl;
+  //    for(pat::TriggerObjectStandAlone tobj : triggerObjects) {
+  //	tobj.unpackFilterLabels(dumb);
+  //	std::cout << tobj.filterLabels().size() << std::endl;
+  //	std::cout << tobj.filterLabels()[0] << std::endl;
+  //      if(tobj.hasFilterLabel(filterName)) {
+  //        if(reco::deltaR(eta,phi,tobj.eta(),tobj.phi()) < dRMax) {
+  //          matchBits[filterBit] = 1; 
+  //        }
+  //      }
+  //    }
+  //  }
+  //}
 
   return matchBits;
 }

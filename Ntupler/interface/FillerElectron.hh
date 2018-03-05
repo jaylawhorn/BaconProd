@@ -48,9 +48,10 @@ namespace baconhep
 	      const edm::Event                            &iEvent,          // event info
 	      const edm::EventSetup                       &iSetup,          // event setup info
 	      const reco::Vertex                          &pv,              // event primary vertex
-	      //const trigger::Results &triggerResults,
+	      const edm::TriggerNames                     &triggerNames,
+	      const edm::TriggerResults                   &triggerResults,
 	      const std::vector<TriggerRecord>            &triggerRecords,  // list of trigger names and objects
-	      const pat::TriggerObjectStandAloneCollection &triggerObjects);   // event trigger objects
+	      pat::TriggerObjectStandAloneCollection &triggerObjects);   // event trigger objects
     
   protected:
     double dEtaInSeed(const reco::GsfElectron& ele);

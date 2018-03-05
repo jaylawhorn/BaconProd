@@ -250,9 +250,10 @@ void FillerElectron::fill(TClonesArray *array,
 void FillerElectron::fill(TClonesArray *array,
                           const edm::Event &iEvent, const edm::EventSetup &iSetup,
                           const reco::Vertex &pv,
-			  //const trigger::Results &triggerResults,
+			  const edm::TriggerNames &triggerNames,
+			  const edm::TriggerResults &triggerResults,
                           const std::vector<TriggerRecord> &triggerRecords,
-                          const pat::TriggerObjectStandAloneCollection &triggerObjects)
+                          pat::TriggerObjectStandAloneCollection &triggerObjects)
 {
   assert(array);
 
@@ -391,7 +392,7 @@ void FillerElectron::fill(TClonesArray *array,
     // Obtain a track ID, unique per event. The track ID is the index in the general tracks collection
     pElectron->trkID = -1;  // general tracks not in MINIAOD
 
-    //pElectron->hltMatchBits = TriggerTools::matchHLT(pElectron->eta, pElectron->phi, triggerResults, triggerObjects);
+    pElectron->hltMatchBits = TriggerTools::matchHLT(pElectron->eta, pElectron->phi, iEvent, triggerRecords, triggerNames, triggerResults, triggerObjects);
   }
 }
 
